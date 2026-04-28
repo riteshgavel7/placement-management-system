@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Registration</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="form-container">
+
+    <h2>Company Registration</h2>
+
+    <form id="registerForm">
+
+        <div class="div-input">
+            <input type="text" id="name" name="name" placeholder="Owner / HR Name" required>
+        </div>
+
+        <div class="div-input">
+            <input type="email" id="email" name="email" placeholder="Company Email" required>
+        </div>
+
+        <div class="div-input">
+            <input type="password" id="password" name="password" placeholder="Password" required>
+        </div>
+
+        <div class="div-input">
+            <input type="text" id="companyName" name="companyName" placeholder="Company Name" required>
+        </div>
+
+        <div class="div-input">
+            <input type="text" id="location" name="location" placeholder="Location" required>
+        </div>
+
+        <div class="div-input">
+            <input type="text" id="website" name="website" placeholder="Website (https://...)" required>
+        </div>
+
+        <div class="div-input">
+            <input type="text" id="description" name="description" placeholder="Company Description" required>
+        </div>
+
+        <div class="div-input">
+            <button type="submit" class="submit-btn">Register Company</button>
+        </div>
+
+    </form>
+
+    <div class="register">
+        <p>Already have an account? <a href="company-login.html">Login</a></p>
+    </div>
+
+</div>
+
+<script src="js/company.js"></script>
+
+</body>
+</html>

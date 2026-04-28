@@ -1,0 +1,65 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* Choti si styling status badge ke liye */
+  .status-badge { padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; background: #eee; }
+  .pending { color: orange; }
+  .verifiedbyhod { color: blue; }
+  .approved { color: green; }
+  .rejected { color: red; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2>My Profile</h2>
+      <span id="status" class="status-badge">PENDING</span>
+    </div>
+
+    <div class="profile-header">
+      <img id="profilePic" width="100" style="border-radius: 50%; border: 2px solid #ddd; object-fit: cover; height: 100px;" />
+
+      <div class="info">
+        <p><b>Name:</b> <span id="name"></span></p>
+        <p><b>Email:</b> <span id="email"></span></p>
+        <p><b>Mobile:</b> <span id="mobile"></span></p>
+        
+        <p><b>Enrollment No:</b> <span id="enrollmentNo"></span></p>
+        <p><b>Roll Number:</b> <span id="rollNo"></span></p>
+        <p><b>Department:</b> <span id="department"></span> (<span id="course"></span>)</p>
+        <p><b>Gender:</b> <span id="gender"></span></p>
+        <p><b>12th Marks:</b> <span id="twelfthMarks"></span></p>
+        <p><b>Payment Receipt:</b> <span id="paymentId" style="font-family: monospace; color: #555;"></span></p>
+        <p><b>Account Status:</b> <span id="isVerifiedBadge"></span></p>
+        <p style="margin-top: 10px;">
+          <a id="resume" target="_blank" style="color: #470fed; text-decoration: none; font-weight: bold;">📄 View Resume</a>
+        </p>
+      </div>
+    </div>
+
+    <br>
+    <button onclick="logout()" style="background: #e74c3c;">Logout</button>
+  </div>
+
+  <div class="card">
+    <h3>Opportunities</h3>
+    <p>Find and apply for the latest jobs.</p>
+    <a href="job.html">
+      <button style="width: 100%;">View Available Jobs</button>
+    </a>
+  </div>
+
+</div>
+
+<script src="js/app.js"></script>
+
+</body>
+</html>

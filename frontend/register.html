@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration - Placement Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+
+<body>
+
+<div class="form-container">
+    <h2>New Registration</h2>
+
+    <form id="registerForm">
+        <div id="detailsSection">
+            <div class="div-input">
+                <input type="text" name="name" placeholder="Full Name" required>
+            </div>
+            
+            <div class="div-input">
+                <input type="email" id="regEmail" name="email" placeholder="GGV Email ID" required>
+            </div>
+
+            <div class="div-input">
+                <input type="password" name="password" placeholder="Set Password" required>
+            </div>
+
+            <div class="div-input">
+                <input type="text" name="mobile" placeholder="Mobile Number" required>
+            </div>
+
+            <div class="div-input">
+                <input type="text" id="enrollmentNo" name="enrollmentNo" placeholder="Enrollment Number" required>
+            </div>
+
+            <div class="div-input">
+                <input type="text" id="rollNo" name="rollNo" placeholder="Roll Number" required>
+            </div>
+            <div class="div-input">
+    <select name="gender" required>
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+    </select>
+</div>
+
+<div class="div-input">
+    <input type="number" name="twelfthMarks" placeholder="Class 12th Percentage / Marks" step="0.01" required>
+</div>
+
+<div class="div-input">
+    <input type="text" name="twelfthPassingYear" placeholder="12th Passing Year (e.g. 2022)" required>
+</div>
+
+            <div class="div-input">
+  <select name="department" required>
+    <option value="">Select Department</option>
+    <option value="CSIT">CSIT</option>
+    <option value="CSE">CSE</option>
+    <option value="PHYSICS">PHYSICS</option>
+    <option value="Mechanical">Mechanical</option>
+    <option value="Civil">Civil</option>
+    <option value="Commerce">Commerce</option>
+  </select>
+</div>
+
+            <div class="div-input">
+                <input type="text" name="course" placeholder="Course (e.g. M.Sc)" required>
+            </div>
+
+            <div class="div-input">
+                <input type="text" name="batch" placeholder="Batch (e.g. 2024-26)" required>
+            </div>
+
+            <div class="div-input">
+                <p style="font-size: 11px; margin-bottom: 2px; color: #888; text-align: left;">Profile Picture:</p>
+                <input type="file" name="profilePicture" accept="image/*" required>
+            </div>
+
+            <div class="div-input">
+                <p style="font-size: 11px; margin-bottom: 2px; color: #888; text-align: left;">Resume (PDF):</p>
+                <input type="file" name="resume" accept=".pdf" required>
+            </div>
+
+            <button type="button" id="getOtpBtn" class="submit-btn" style="margin-top: 10px;">Get OTP to Register</button>
+        </div>
+
+        <div id="otpSection" style="display: none; margin-top: 20px; border-top: 1px solid #ccc; padding-top: 20px;">
+            <div class="div-input">
+                <input type="text" id="regOtp" name="otp" placeholder="Enter 6-Digit OTP">
+            </div>
+            <button type="submit" class="submit-btn" style="background: #222;">Verify & Complete Registration</button>
+        </div>
+    </form>
+
+    <div class="register">
+        <p>Already have an account? <a href="index.html">Login</a></p>
+    </div>
+
+</div>
+
+<script src="js/app.js"></script>
+
+</body>
+</html>

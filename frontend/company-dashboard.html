@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard | GGV Placement</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>🏢 Company Dashboard</h2>
+            <div class="user-info">
+                <span id="companyNameDisplay" style="font-weight: bold; color: #555;">Welcome, Company</span>
+            </div>
+        </header>
+
+        
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <a href="company-createjob.html">
+                <button style="background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">➕ Create New Job</button>
+            </a>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
+
+        <div id="jobsSection">
+            <h3>📋 Your Posted Jobs</h3>
+            <div id="jobsContainer">
+                <p>Loading jobs...</p>
+            </div>
+        </div>
+
+        <div id="applicantsSection" style="margin-top: 30px; display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>👨‍🎓 Applicants for: <span id="currentJobTitle" style="color: #007BFF;">Select a Job</span></h3>
+                <button onclick="closeApplicants()" style="background: #666; color: white; border: none; padding: 5px 10px; border-radius: 4px;">Close</button>
+            </div>
+            <div id="applicantsContainer" style="margin-top: 10px; border: 1px solid #eee; border-radius: 8px; padding: 15px; background: #fafafa;">
+                <p>Click on "View Applicants" of any job to see details.</p>
+            </div>
+        </div>
+
+        <div id="analysisResult" style="margin-top: 20px; padding: 15px; border-radius: 8px; background: #fffde7; display: none;"></div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <button onclick="logout()" style="background-color: #dc3545; color: white; padding: 10px 25px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">🚪 Logout</button>
+        </div>
+    </div>
+</div>
+
+<div id="detailsModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: 1000; overflow-y: auto;">
+    <div style="background: white; width: 600px; margin: 50px auto; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
+            <h3 id="modalStudentName" style="margin:0; color: #333;">Student Profile</h3>
+            <button onclick="document.getElementById('detailsModal').style.display='none'" style="background:none; border:none; font-size: 24px; cursor:pointer;">&times;</button>
+        </div>
+
+        <div id="modalContent">
+            </div>
+
+        <div style="text-align: right; margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px;">
+            <button onclick="document.getElementById('detailsModal').style.display='none'" style="background: #007BFF; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Close Profile</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/company.js"></script>
+
+</body>
+</html>

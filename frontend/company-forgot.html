@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Forgot Password</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="form-container">
+  <h2>Forgot Password</h2>
+
+  <!-- ================= EMAIL FORM ================= -->
+  <form id="emailForm">
+    <div class="div-input">
+      <input id="email" type="email" placeholder="Enter your email" required />
+    </div>
+    <button type="submit" class="submit-btn">Send OTP</button>
+  </form>
+
+  <!-- ================= OTP + PASSWORD FORM ================= -->
+  <form id="otpForm" style="display:none;">
+    <div class="div-input">
+      <input id="otp" type="text" placeholder="Enter OTP" required />
+    </div>
+
+    <div class="div-input">
+      <input id="newPassword" type="password" placeholder="Enter New Password" required />
+    </div>
+
+    <button type="submit" class="submit-btn">Reset Password</button>
+  </form>
+
+  <div class="register">
+    <p><a href="company-login.html">Back to Login</a></p>
+  </div>
+
+</div>
+
+<script src="js/company.js"></script>
+</body>
+</html>

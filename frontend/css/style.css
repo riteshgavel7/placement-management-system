@@ -1,0 +1,229 @@
+/* ========================================================
+   1. GLOBAL RESET & BASE STYLES
+   ======================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #f0f4f8; /* Premium light blue-grey background */
+    color: #334155;
+    line-height: 1.6;
+}
+
+a { text-decoration: none; color: #2c3e50; }
+a:hover { text-decoration: underline; }
+
+/* ========================================================
+   2. FORM CONTAINERS (Register, Forgot Password, Create Job)
+   ======================================================== */
+.form-container {
+    background: #ffffff;
+    max-width: 800px; /* Badi width taaki 2 columns fit aa sakein */
+    margin: 40px auto;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
+.form-container h2 {
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 30px;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+/* 🔥 MAGIC: Forms ko 2-Column layout banaye bina HTML chhede */
+.form-container form, #detailsSection {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.div-input {
+    width: calc(50% - 10px); /* 50% width dono side */
+    margin-bottom: 20px;
+}
+
+/* File inputs, buttons, aur OTP section ko poori width dein */
+.div-input:has(input[type="file"]), 
+.div-input:has(button),
+#otpSection, 
+#getOtpBtn {
+    width: 100% !important;
+}
+
+/* ========================================================
+   3. LOGIN BOXES (Student, HOD, Admin, Company)
+   ======================================================== */
+.login-box {
+    background: #ffffff;
+    max-width: 420px;
+    margin: 60px auto;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
+.login-header header {
+    font-size: 26px;
+    font-weight: bold;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.input-box { margin-bottom: 20px; }
+
+/* ========================================================
+   4. INPUT STYLING (Inputs, Selects, Passwords)
+   ======================================================== */
+input[type="text"], input[type="email"], input[type="password"], 
+input[type="number"], input[type="date"], select, .input-field {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14.5px;
+    color: #334155;
+    background-color: #f8fafc;
+    transition: all 0.3s ease;
+}
+
+input:focus, select:focus, .input-field:focus {
+    outline: none;
+    border-color: #2c3e50;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(71, 15, 237, 0.1);
+}
+
+.div-input p {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+/* ========================================================
+   5. BUTTONS
+   ======================================================== */
+.submit-btn, button {
+    background-color: #2c3e50; /* Premium Indigo Brand Color */
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-shadow: 0 4px 6px rgba(71, 15, 237, 0.2);
+}
+
+button:hover, .submit-btn:hover {
+    background-color: #3607cc;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(14, 6, 38, 0.3);
+}
+
+button[onclick="logout()"] {
+    background-color: #ef4444;
+    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+}
+button[onclick="logout()"]:hover { background-color: #dc2626; }
+
+/* Dashboard short buttons */
+.card a button { width: auto; min-width: 150px; }
+
+/* ========================================================
+   6. DASHBOARDS (.container & .card)
+   ======================================================== */
+.container {
+    max-width: 1100px; /* Dashboards thode wide achhe lagte hain */
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.card {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 25px;
+}
+
+/* Profile specific */
+.profile-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.profile-header .info {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Profile details 2 column mein */
+    gap: 12px 30px;
+}
+
+.profile-header .info p {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 15px;
+}
+
+.profile-header .info p b {
+    color: #64748b;
+    display: inline-block;
+    min-width: 120px;
+}
+
+/* ========================================================
+   7. BADGES & EXTRAS
+   ======================================================== */
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.pending { background: #fef3c7; color: #d97706; }
+.verifiedbyhod { background: #dbeafe; color: #2563eb; }
+.approved { background: #dcfce3; color: #16a34a; }
+.rejected { background: #fee2e2; color: #dc2626; }
+
+.forgot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 20px;
+    color: #64748b;
+}
+
+.register {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+}
+
+/* ========================================================
+   8. MOBILE RESPONSIVE
+   ======================================================== */
+@media (max-width: 768px) {
+    .div-input { width: 100%; } /* Mobile par saare form 1 column mein */
+    .profile-header { flex-direction: column; align-items: center; text-align: center; }
+    .profile-header .info { grid-template-columns: 1fr; }
+    .profile-header .info p b { min-width: auto; margin-right: 10px; }
+    .form-container, .login-box, .card { padding: 25px; margin: 20px; }
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Notifications - GGV Placement Portal</title>
+    <link rel="stylesheet" href="css/home.css">
+    <style>
+        .notices-container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .notice-list-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .notice-list-item:hover { background: #f9f9f9; }
+        .view-btn {
+            background: #d9534f;
+            color: white;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo"><h1>GGV Placement Portal</h1></div>
+            <ul class="nav-links">
+                <li><a href="home.html">Back to Home</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="notices-container">
+        <h2>📢 All Official Notifications</h2>
+        <hr>
+        <div id="fullNoticeList">
+            Loading all notices...
+        </div>
+    </main>
+
+    <script>
+        async function fetchAllNotices() {
+            const container = document.getElementById("fullNoticeList");
+            try {
+                const res = await fetch("http://localhost:3000/api/admin/notices");
+                const notices = await res.json();
+
+                if (notices.length === 0) {
+                    container.innerHTML = "<p>No notices found.</p>";
+                    return;
+                }
+
+                container.innerHTML = notices.map(n => `
+                    <div class="notice-list-item">
+                        <div>
+                            <h4 style="margin:0;">${n.title}</h4>
+                            <p style="color:#666; margin:5px 0;">${n.description}</p>
+                            <small style="color:#999;">Posted on: ${new Date(n.createdAt).toLocaleDateString()}</small>
+                        </div>
+                        ${n.pdfPath ? `
+                            <a href="http://localhost:3000${n.pdfPath}" target="_blank" class="view-btn">
+                                Open PDF
+                            </a>` : ''}
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = "<p>Error loading notices. Please try again later.</p>";
+            }
+        }
+        document.addEventListener("DOMContentLoaded", fetchAllNotices);
+    </script>
+</body>
+</html>

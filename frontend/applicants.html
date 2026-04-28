@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Applicants | GGV Placement</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .section-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .applicant-card {
+      border: 1px solid #ddd;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
+    .back-btn {
+      margin-bottom: 15px;
+      padding: 8px 15px;
+      background: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .score {
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="section-box">
+    <h2>👥 Job Applicants</h2>
+    <div id="applicantsContainer">Loading...</div>
+  </div>
+
+  <script>
+  const API_BASE = "http://localhost:3000/api";
+
+  // ✅ 1. URL se jobId nikalo (Dashboard link ke liye) ya fir localStorage dekho
+  const urlParams = new URLSearchParams(window.location.search);
+  const jobId = urlParams.get("jobId") || localStorage.getItem("selectedJobId");
+
+  function getToken() {
+    // ✅ HOD ke liye 'token' ko priority di gayi hai
+    return localStorage.getItem("token") || 
+           localStorage.getItem("companyToken") || 
+           sessionStorage.getItem("companyToken") || 
+           localStorage.getItem("adminToken");
+  }
+
+  async function loadApplicants() {
+    const container = document.getElementById("applicantsContainer");
+    const token = getToken();
+
+    // Debugging (Console mein check karne ke liye)
+    console.log("Loading applicants for Job:", jobId);
+
+    if (!jobId || !token) {
+      container.innerHTML = "<p style='color:red; text-align:center;'><b>Session Expired!</b><br>Please login again or return to HOD Dashboard.</p>";
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/jobs/${jobId}/applicants`, {
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
+        }
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        container.innerHTML = `<p style='color:red; text-align:center;'>${data.message || 'Access Denied'}</p>`;
+        return;
+      }
+
+      const applicants = data.applicants || [];
+
+      if (applicants.length === 0) {
+        container.innerHTML = "<p style='text-align:center;'>No applicants found for this job.</p>";
+        return;
+      }
+
+      container.innerHTML = applicants.map(app => {
+        const student = app.student || {};
+        const statusColor = app.status === 'selected' ? '#27ae60' : (app.status === 'rejected' ? '#e74c3c' : '#f39c12');
+        
+        return `
+          <div class="applicant-card" style="border:1px solid #ddd; padding:15px; border-radius:8px; margin-bottom:10px; background:#fff;">
+            <h3 style="margin:0; color:#2c3e50;">${student.name || "Unknown Student"}</h3>
+            <p><b>📧 Email:</b> ${student.email || "N/A"}</p>
+            <p class="score"><b>📊 Score:</b> ${app.score || 0}%</p>
+            <p><b>📌 Status:</b> <span style="color:${statusColor}; font-weight:bold; text-transform:capitalize;">${app.status}</span></p>
+            ${student.resume ? 
+              `<a href="${student.resume}" target="_blank" style="display:inline-block; margin-top:10px; padding:5px 10px; background:#3498db; color:white; border-radius:4px; text-decoration:none; font-size:13px;">📄 View Resume</a>` : 
+              '<span style="color:gray; font-size:13px;">🚫 No Resume Uploaded</span>'}
+          </div>
+        `;
+      }).join("");
+
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = "<p style='color:red; text-align:center;'>Failed to load applicants. Check server connection.</p>";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadApplicants);
+</script>
+
+</body>
+</html>

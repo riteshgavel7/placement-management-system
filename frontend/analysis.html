@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Job Analysis Dashboard</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
+    .container { max-width: 700px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    
+    .nav-buttons { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    
+    button { padding: 10px 18px; border-radius: 6px; cursor: pointer; border: none; font-weight: 600; transition: 0.3s; }
+    
+    .excel-btn { background: #1d6f42; color: white; }
+    button:hover { opacity: 0.85; transform: translateY(-1px); }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+
+    h2 { text-align: center; color: #333; margin: 10px 0 25px; }
+    h3 { color: #007BFF; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+
+    .card { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+    .box { background: #f8f9fa; padding: 25px; border-radius: 10px; text-align: center; border-bottom: 4px solid #007BFF; }
+    .box h3 { border: none; margin: 0; font-size: 28px; color: #333; }
+    .box p { margin: 5px 0 0; color: #666; font-weight: 500; }
+
+    .selected { border-bottom-color: #28a745; }
+    .rejected { border-bottom-color: #dc3545; }
+    .total { border-bottom-color: #007BFF; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="nav-buttons">
+    
+    <button class="excel-btn" id="dlBtn" onclick="downloadExcel()">📥 Download Excel</button>
+  </div>
+
+  <h2>📊 Job Analysis Dashboard</h2>
+  <div id="analysisResult">
+    <p style="text-align: center; color: #666;">Fetching analytics...</p>
+  </div>
+</div>
+
+<script>
+const API_BASE = "http://localhost:3000/api";
+
+// ✅ 1. URL se jobId nikalo (Dashboard link ke liye) ya localStorage dekho
+const urlParams = new URLSearchParams(window.location.search);
+const jobId = urlParams.get("jobId") || localStorage.getItem("selectedJobId");
+
+function getToken() {
+  // ✅ Priority order set kiya hai: HOD/General 'token' pehle
+  return localStorage.getItem("token") || 
+         localStorage.getItem("companyToken") || 
+         localStorage.getItem("adminToken") ||
+         sessionStorage.getItem("companyToken");
+}
+
+// Optimized Excel Download
+async function downloadExcel() {
+  const token = getToken();
+  const btn = document.getElementById("dlBtn");
+  if (!jobId) return alert("Job ID missing!");
+  
+  try {
+    btn.disabled = true;
+    btn.innerText = "⏳ Generating...";
+    
+    const res = await fetch(`${API_BASE}/analytics/${jobId}/excel`, {
+      method: "GET",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    
+    if (!res.ok) throw new Error("Could not generate Excel file");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Analysis_Report_${jobId}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+  } catch (err) {
+    alert("Excel Error: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "📥 Download Excel";
+  }
+}
+
+// Optimized Data Loading
+async function load() {
+  const container = document.getElementById("analysisResult");
+  const token = getToken();
+
+  // ✅ Debugging ke liye console check karein agar error aaye
+  console.log("Current JobID:", jobId);
+  console.log("Current Token:", token ? "Exist" : "Missing");
+
+  if (!jobId || !token) {
+    container.innerHTML = `<div style="text-align:center; color:red; padding:20px;">
+      <b>Session Expired or Missing Job ID!</b><br>Please login again or go back to Dashboard.
+    </div>`;
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/analytics/${jobId}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+       throw new Error("Server returned non-JSON response");
+    }
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      container.innerHTML = `<p style='color:red; text-align:center;'>${data.message || "Access Denied"}</p>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <h3>Job Title: ${data.jobTitle || "N/A"}</h3>
+      <div class="card">
+        <div class="box total">
+          <h3>${data.totalApplicants || 0}</h3>
+          <p>Total Applicants</p>
+        </div>
+        <div class="box selected">
+          <h3>${data.selected || 0}</h3>
+          <p>Selected</p>
+        </div>
+        <div class="box rejected">
+          <h3>${data.rejected || 0}</h3>
+          <p>Rejected</p>
+        </div>
+      </div>
+    `;
+
+  } catch (err) {
+    container.innerHTML = `<p style='color:red; text-align:center;'>Unable to connect to server. Check if Backend is running.</p>`;
+    console.error("Analysis Load Error:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", load);
+</script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | GGV Placement</title>
+    <link rel="stylesheet" href="css/admin.css"> 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <nav class="sidebar">
+        <h2>GGV Admin</h2>
+        <ul>
+            <li><a href="#" onclick="showSection('statsSection')">📊 Dashboard</a></li>
+            <li><a href="#" onclick="showSection('updateSection')">👨🏻‍💻 Student Detail Update</a></li>
+            <li><a href="#" onclick="showSection('approvalSection')">✅ Student Approvals</a></li>
+            <li><a href="#" onclick="showSection('companySection')">✅ Company Approvals</a></li>
+            <li><a href="#" onclick="showSection('noticesSection')">📢 Post Notice</a></li>
+            <li><a href="#" onclick="showSection('jobs')">💼 Job Applications</a></li>
+            <li><a href="#" onclick="showSection('hodSection')">🎓 Manage HOD</a></li>
+            <li><a href="#" class="logout-btn" onclick="logout()" style="color: #ff4d4d; margin-top: 20px; display: block;">🚪 Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-content">
+        <header class="top-header">
+            <h1 id="adminWelcome">Welcome, Admin</h1>
+            <button class="submit-btn" style="width: auto; padding: 10px 20px;" onclick="exportData()">📥 Export to Excel</button>
+        </header>
+
+        <div id="statsSection">
+            <div class="stats-grid">
+                <div class="stat-card"><h3>Total Students</h3><p id="countStudents">0</p></div>
+                <div class="stat-card"><h3>Pending Verification</h3><p id="countPending" style="color: #e67e22;">0</p></div>
+                <div class="stat-card"><h3>Companies</h3><p id="countCompanies">0</p></div>
+                <div class="stat-card"><h3>Placed Students</h3><p id="countPlaced" style="color: #27ae60;">0</p></div>
+            </div>
+            <div class="section-box">
+               <h3>📊 Department Analytics</h3>
+               <canvas id="barChart" style="max-height: 300px;"></canvas>
+            </div>
+            <div class="section-box">
+              <h3>🥧 Department Distribution</h3>
+              <canvas id="pieChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+        
+        <div id="updateSection" class="section-box" style="display:none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>👨🏻‍💻 Manage & Update Student Details</h3>
+                <input type="text" id="adminStudentSearch" placeholder="Search Roll No..." onkeyup="filterUpdateTable()" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Roll No</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="adminUpdateTableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="hodSection" class="section-box" style="display:none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>🎓 Manage Department HODs</h3>
+                <button class="btn-approve" onclick="toggleHodForm()">+ Add New HOD</button>
+            </div>
+            <div id="addHodFormBox" style="display: none; background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
+                <h4>Create HOD Account</h4>
+                <form id="createHodForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <input type="text" id="hodName" placeholder="Full Name" required>
+                    <input type="email" id="hodEmail" placeholder="Email ID" required>
+                    <input type="password" id="hodPassword" placeholder="Set Password" required>
+                    <select id="hodDept" required>
+                        <option value="">Select Department</option>
+                        <option value="CSIT">CSIT</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <option value="Civil">Civil</option>
+                        <option value="Commerce">Commerce</option>
+                    </select>
+                    <button type="submit" class="btn-approve" style="grid-column: span 2;">Create HOD Account 🚀</button>
+                </form>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Name</th><th>Department</th><th>Email</th><th>Action</th></tr>
+                </thead>
+                <tbody id="hodTableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="approvalSection" class="section-box" style="display:none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>Pending Student Approvals</h3>
+                <select id="deptFilter" onchange="fetchPendingStudents()">
+                    <option value="">All Departments</option>
+                    <option value="CSIT">CSIT</option>
+                    <option value="Mechanical">Mechanical</option>
+                    <option value="Civil">Civil</option>
+                    <option value="Commerce">Commerce</option>
+                </select>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Name</th><th>Roll No</th><th>Enrollment</th><th>Email</th><th>Mobile</th><th>DEPT</th><th>Action</th></tr>
+                </thead>
+                <tbody id="pendingTableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="companySection" class="section-box" style="display:none;">
+            <h3>Pending Company Approvals</h3>
+            <table>
+                <thead><tr><th>Company</th><th>Email</th><th>Location</th><th>Website</th><th>Action</th></tr></thead>
+                <tbody id="companyTableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="noticesSection" class="section-box" style="display:none;">
+            <h3>📢 Post Notice</h3>
+            <form id="noticeForm">
+                <input type="text" id="noticeTitle" placeholder="Title" required style="width:100%; margin-bottom:10px; padding:8px;">
+                <textarea id="noticeDesc" placeholder="Description" style="width:100%; margin-bottom:10px; padding:8px;"></textarea>
+                <input type="file" id="noticePdf" accept="application/pdf">
+                <button type="submit" class="btn-approve">Post 🚀</button>
+            </form>
+        </div>
+
+        <div id="jobs" class="section-box" style="display:none;">
+            <h3>💼 Job Tracking</h3>
+            <table>
+                <thead><tr><th>Job Title</th><th>Company</th><th>Applicants</th><th>AI Status</th><th>Action</th></tr></thead>
+                <tbody id="jobTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="editModal" class="modal" style="display:none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="background-color: #fefefe; margin: 2% auto; padding: 25px; border: 1px solid #888; width: 700px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+        <h3 style="margin-top:0; color: #2c3e50;">🛡️ Admin: Full Student Control</h3>
+        <hr style="border: 0.5px solid #eee; margin-bottom: 20px;">
+        
+        <div class="modal-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label for="editName" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Full Name</label>
+                <input type="text" id="editName" class="input-field" style="width:100%;">
+            </div>
+            <div>
+                <label for="editEmail" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Email (Locked)</label>
+                <input type="text" id="editEmail" class="input-field" disabled style="width:100%; background: #f4f4f4;">
+            </div>
+
+            <div>
+                <label for="editMobile" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Mobile</label>
+                <input type="text" id="editMobile" class="input-field" style="width:100%;">
+            </div>
+            <div>
+                <label for="editRoll" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Roll No</label>
+                <input type="text" id="editRoll" class="input-field" style="width:100%;">
+            </div>
+
+            <div>
+                <label for="editEnroll" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Enrollment No</label>
+                <input type="text" id="editEnroll" class="input-field" style="width:100%;">
+            </div>
+            <div>
+                <label for="editDept" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Department</label>
+                <input type="text" id="editDept" class="input-field" disabled style="width:100%; background: #f4f4f4;">
+            </div>
+
+            <div>
+                <label for="editCourse" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Course</label>
+                <input type="text" id="editCourse" class="input-field" style="width:100%;">
+            </div>
+            <div>
+                <label for="editBatch" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Batch</label>
+                <input type="text" id="editBatch" class="input-field" style="width:100%;">
+            </div>
+
+            <div>
+                <label for="editMarks" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">12th Marks (%)</label>
+                <input type="number" step="0.01" id="editMarks" class="input-field" style="width:100%;">
+            </div>
+            <div>
+                <label for="editPassingYear" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">12th Passing Year</label>
+                <input type="text" id="editPassingYear" class="input-field" style="width:100%;">
+            </div>
+
+            <div>
+                <label for="editGender" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Gender</label>
+                <select id="editGender" class="input-field" style="width:100%; height: 38px;">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div>
+                <label for="editPaymentStatus" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Payment Status</label>
+                <input type="text" id="editPaymentStatus" class="input-field" disabled style="width:100%; font-weight: bold;">
+            </div>
+
+            <div>
+                <label for="editAdminApproval" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Admin Approval</label>
+                <input type="text" id="editAdminApproval" class="input-field" disabled style="width:100%; font-weight: bold;">
+            </div>
+            <div>
+             <label for="editIsVerified" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Email Verified</label>
+              <select id="editIsVerified" class="input-field" style="width:100%; font-weight: bold; height: 38px;">
+             <option value="true">VERIFIED ✅</option>
+            <option value="false">NOT VERIFIED ❌</option>
+             </select>
+            </div>
+
+            <div>
+                <label for="editHodCount" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">HOD Edit Count (0-2)</label>
+                <input type="number" id="editHodCount" class="input-field" min="0" max="2" style="width:100%; font-weight: bold; text-align: center;">
+            </div>
+            <div>
+                <label for="editStatus" style="font-size: 12px; color: #666; display: block; margin-bottom: 2px;">Current Status</label>
+                <input type="text" id="editStatus" class="input-field" disabled style="width:100%; font-weight:bold; color: #e67e22;">
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; background: #f9f9f9; padding: 10px; border-radius: 8px;">
+            <a id="viewResumeBtn" href="#" target="_blank" class="btn-approve" style="background: #34495e; text-decoration: none; font-size: 13px; color:white; padding: 8px 15px; border-radius: 5px;">📄 View Resume</a>
+            <a id="viewPicBtn" href="#" target="_blank" class="btn-approve" style="background: #34495e; text-decoration: none; font-size: 13px; color:white; padding: 8px 15px; border-radius: 5px;">🖼️ View Photo</a>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; border: 2px solid #3498db; border-radius: 8px; background: #ebf5fb;">
+            <label for="adminAction" style="font-weight: bold; color: #2980b9; display: block; margin-bottom: 5px;">Take Action on Student Profile:</label>
+            <select id="adminAction" class="input-field" style="width: 100%; border: 1px solid #3498db; height: 40px; border-radius: 5px;">
+                <option value="update">Just Update Data (Keep Pending)</option>
+                <option value="approve">Approve Student (Final Placement Eligible)</option>
+                <option value="reject">Reject Student (Back to HOD)</option>
+            </select>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+            <button class="btn-approve" onclick="saveAdminEdit()" style="flex: 2; height: 45px; font-size: 16px; background: #27ae60; color: white; border:none; border-radius:5px; cursor:pointer;">Process & Save ✅</button>
+            <button class="btn-reject" onclick="closeModal()" style="flex: 1; height: 45px; background: #7f8c8d; color: white; border:none; border-radius:5px; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="js/admin.js"></script>
+
+</body>
+</html>

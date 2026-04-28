@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOD Dashboard | GGV Placement</title>
+    <link rel="stylesheet" href="css/hod-style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <h2>HOD PANEL<br><small id="deptLabel">Department</small></h2>
+            <ul>
+                <li><a href="#" onclick="showSection('updateSection')">👨🏻‍💻 Student Detail Update</a></li>
+                <li><a href="#" onclick="showSection('manageSection')">📋 Student Records</a></li>
+                <li><a href="#" onclick="showSection('jobsSection')">💼 Job Posted</a></li>
+                <li><a href="#" class="logout-btn" onclick="logout()">🚪 Logout</a></li>
+            </ul>
+        </nav>
+
+        <div class="main-content">
+            <header class="top-header">
+                <h1 id="hodWelcome">Welcome, HOD</h1>
+                <div class="dept-tag" id="deptTag">Loading...</div>
+            </header>
+
+            <div id="updateSection" class="section-box">
+                <h3>Students Detail Correction</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Roll No</th>
+                            <th>Enrollment</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                   <tbody id="pendingTableBody"></tbody> 
+                </table>
+            </div>
+
+            <div id="manageSection" class="section-box" style="display:none;">
+                <h3>Department Students (All)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Edits Done</th>
+                            <th>Final Status</th>
+                            <th>Action</th> </tr>
+                    </thead>
+                    <tbody id="studentTableBody"></tbody>
+                </table>
+            </div>
+
+            <div id="jobsSection" class="section-box" style="display:none;">
+                <h3>💼 Jobs for Your Department</h3>
+                <div id="jobsContainer" class="jobs-grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+    <div class="modal-content" style="width: 600px; max-height: 95vh; overflow-y: auto; padding: 25px;">
+        <h3>📝 Update Student Details</h3>
+        <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Review all fields. Some fields are Read-Only.</p>
+        
+        <div class="modal-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div><label>Full Name</label><input type="text" id="editName" class="input-field"></div>
+            <div><label>Gmail (Login)</label><input type="text" id="editEmail" class="input-field" disabled style="background:#f4f4f4;"></div>
+            <div><label>Mobile</label><input type="text" id="editMobile" class="input-field"></div>
+            <div>
+                <label>Gender</label>
+                <select id="editGender" class="input-field">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div><label>Roll No</label><input type="text" id="editRoll" class="input-field"></div>
+            <div><label>Enrollment No</label><input type="text" id="editEnroll" class="input-field"></div>
+            <div><label>Course</label><input type="text" id="editCourse" class="input-field" disabled style="background:#f4f4f4;"></div>
+            <div><label>Batch</label><input type="text" id="editBatch" class="input-field" disabled style="background:#f4f4f4;"></div>
+            <div><label>12th Marks (%)</label><input type="number" id="editMarks" class="input-field"></div>
+            <div><label>12th Passing Year</label><input type="text" id="editYear" class="input-field"></div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div><label style="font-size: 11px;">Fee Status</label><input type="text" id="editIsPaid" class="input-field" disabled></div>
+                <div><label style="font-size: 11px;">Current Status</label><input type="text" id="editStatus" class="input-field" disabled style="font-weight:bold; color: #d35400;"></div>
+                
+                <div style="grid-column: span 2;">
+                    <label style="font-size: 11px; font-weight: bold;">Email Verification Status</label>
+                    <select id="editIsVerified" class="input-field" style="border: 1px solid #ccc; background: white;">
+                        <option value="true">Verified ✅</option>
+                        <option value="false">Pending ❌</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top:20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
+            <h4 style="margin-top:0; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Documents (Select to Update)</h4>
+            
+            <div style="margin-top: 10px;">
+                <label>Update Resume (PDF Only)</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="file" id="fileResume" class="input-field" accept=".pdf">
+                    <a id="viewResumeBtn" href="#" target="_blank" style="padding: 10px 15px; background: #007BFF; color: white; text-decoration: none; border-radius: 4px; font-size: 13px; display: none;">📄 View Current</a>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <label>Update Profile Photo</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="file" id="filePic" class="input-field" accept="image/*">
+                    <a id="viewPicBtn" href="#" target="_blank" style="padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; font-size: 13px; display: none;">🖼️ View Current</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-btns" style="margin-top: 25px; display: flex; gap: 10px;">
+            <button class="btn-approve" style="flex: 2; height: 45px; font-weight: bold;" onclick="saveEdit()">Update & Verify Data</button>
+            <button class="btn-close" style="flex: 1; height: 45px; background:#666; color:white; border:none; cursor:pointer;" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+    </div>
+
+    <script src="js/hod-dashboard.js"></script>
+</body>
+</html>
