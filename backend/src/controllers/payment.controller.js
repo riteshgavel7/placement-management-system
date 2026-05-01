@@ -7,7 +7,7 @@ const mongoose = require('mongoose'); // Validation ke liye
 const createOrder = async (req, res) => {
     try {
         const { email, enrollmentNo, rollNo } = req.body;
-        const amount = 5; // Production mein ise env ya config se lo
+        const amount = 0; // Production mein ise env ya config se lo
 
         // Duplicate check (Strict)
         const existingStudent = await Student.findOne({ 
