@@ -279,7 +279,7 @@ const sendOTP = async (req, res) => {
     });
 
    
-    res.json({ message: "OTP sent to email", tempOtp: otp }); 
+    res.json({ message: "OTP sent to email"}); 
 
   } catch (err) {
     console.log("🔥 OTP ERROR:", err);
