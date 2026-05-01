@@ -1,5 +1,7 @@
-const API_URL = "http://localhost:3000/api/admin";
-const API_JOB = "http://localhost:3000/api/jobs/all";
+const BASE_URL = "https://placement-management-system-etjs.onrender.com";
+const API_URL = `${BASE_URL}/api/admin`;
+const API_JOB = `${BASE_URL}/api/jobs/all`;
+
 const token = localStorage.getItem("token");
 const role = localStorage.getItem("role");
 let currentStudentId = null;
@@ -129,6 +131,7 @@ window.loadAndOpenModal = async function(id) {
 // 3. Save Edit (Using FormData for Backend Sync)
 window.saveEdit = async function() {
     if (!currentStudentId) return alert("Student ID missing!");
+    
 
     const formData = new FormData();
     
@@ -146,6 +149,9 @@ window.saveEdit = async function() {
 
     // Physical Files Append
     const resumeFile = document.getElementById('fileResume').files[0];
+    if (resumeFile && resumeFile.size > 1024 * 1024) {
+    return alert("Resume file is too large (Max 1MB)");
+    }
     const picFile = document.getElementById('filePic').files[0];
 
     if (resumeFile) formData.append("resume", resumeFile);

@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('mobile-menu');
     const navLinks = document.querySelector('.nav-links');
-
-    // Toggle Mobile Menu
+    const RENDER_URL = "https://placement-management-system-etjs.onrender.com";
+    
     menuToggle.addEventListener('click', () => {
         navLinks.classList.toggle('active');
         
@@ -33,7 +33,7 @@ async function loadDynamicNotices() {
 
     try {
         console.log("Fetching notices...");
-        const res = await fetch("http://localhost:3000/api/admin/notices");
+       const res = await fetch(`${RENDER_URL}/api/admin/notices`);
         
         if (!res.ok) throw new Error("Invalid server response.");
         
@@ -47,7 +47,7 @@ async function loadDynamicNotices() {
 
         // Marquee ko naye data se bharo
         const noticeHTML = notices.map(n => {
-            const pdfUrl = n.pdfPath ? `http://localhost:3000${n.pdfPath}` : null;
+            const pdfUrl = n.pdfPath ? `${RENDER_URL}${n.pdfPath}` : null;
             
             return `
                 <div class="notice-item" style="margin-bottom: 20px; border-bottom: 1px dashed #ccc; padding-bottom: 10px;">

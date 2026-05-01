@@ -1,7 +1,8 @@
 const adminLoginForm = document.getElementById("adminLoginForm");
-const API_ADMIN = "http://localhost:3000/api/admin";
-const API_BASE = "http://localhost:3000/api";
-const API_URL = "http://localhost:3000/api/admin";
+const BASE_URL = "https://placement-management-system-etjs.onrender.com";
+const API_ADMIN = `${BASE_URL}/api/admin`;
+const API_BASE = `${BASE_URL}/api`;
+const API_URL = `${BASE_URL}/api/admin`;
 
 let currentStudentId = null;
 const getAdminToken = () => localStorage.getItem("adminToken");

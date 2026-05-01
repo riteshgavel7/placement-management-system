@@ -5,12 +5,14 @@ document.getElementById('hodLoginForm').addEventListener('submit', async (e) => 
     const email = document.getElementById('hodEmail').value;
     const password = document.getElementById('hodPassword').value;
 
+    const BASE_URL = "https://placement-management-system-etjs.onrender.com";
+
     loginBtn.innerText = "Authenticating...";
     loginBtn.disabled = true;
 
+
     try {
-        const response = await fetch('http://localhost:3000/api/admin/hod-login', { 
-            method: 'POST',
+        const response = await fetch(`${BASE_URL}/api/admin/hod-login`, {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });

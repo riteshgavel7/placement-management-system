@@ -2,7 +2,8 @@
 // COMPANY AUTH SYSTEM
 // ======================
 
-const API_BASE = "http://localhost:3000/api";
+const API_BASE = "https://placement-management-system-etjs.onrender.com/api";
+let userEmail = "";
 
 // -------------------- REGISTER ----------------------//
 

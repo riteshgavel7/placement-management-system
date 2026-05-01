@@ -5,7 +5,8 @@ const otpSection = document.getElementById("otpSection");
 
 let serverOtp = "";
 
-const API_BASE = "http://localhost:3000/api/students";
+const RENDER_URL = "https://placement-management-system-etjs.onrender.com";
+const API_BASE = `${RENDER_URL}/api/students`;
 
 // ================= LOGIN SECTION =================
 if (loginForm) {
@@ -55,7 +56,7 @@ if (getOtpBtn) {
         const files = document.querySelectorAll('input[type="file"]');
 for (let fileInput of files) {
     if (fileInput.files.length > 0) {
-        const fileSize = fileInput.files[0].size / 1024 / 1024; // MB mein convert kiya
+        const fileSize = fileInput.files[0].size 
         if (fileSize > 1) {
     alert(`Validation Error: The file "${fileInput.name}" exceeds the 1MB limit. Please upload a smaller file.`); 
     return;
@@ -100,7 +101,7 @@ if (registerForm) {
         }
 
         try {
-            const orderRes = await fetch("http://localhost:3000/api/payment/create-order", {
+            const orderRes = await fetch(`${RENDER_URL}/api/payment/create-order`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

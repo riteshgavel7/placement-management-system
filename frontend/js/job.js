@@ -1,5 +1,6 @@
-const API_JOB = "http://localhost:3000/api/jobs/all";
-const API_APPLY = "http://localhost:3000/api/jobs/apply";
+const BASE_URL = "https://placement-management-system-etjs.onrender.com";
+const API_JOB = `${BASE_URL}/api/jobs/all`;
+const API_APPLY = `${BASE_URL}/api/jobs/apply`;
 
 
 
@@ -111,7 +112,7 @@ async function loadMyApplications() {
   }
 
   try {
-    const res = await fetch("http://localhost:3000/api/jobs/applied", {
+    const res = await fetch(`${BASE_URL}/api/jobs/applied`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
