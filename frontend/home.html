@@ -3,134 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Placement Management System</title>
-    <link rel="stylesheet" href="/frontend/css/home.css">
-    
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Login to placement management system</title>
 </head>
+
 <body>
+<form id="loginForm">
+  <div class="login-box">
 
-    <header class="navbar">
-        <div class="nav-container">
-            <div class="menu-toggle" id="mobile-menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
+    <div class="login-header">
+      <header>Student Login</header>
+    </div>
 
-            <div class="logo">
-                <h1>Placement Management System</h1>
-            </div>
+    <div class="input-box"> 
+      <input type="text" class="input-field" id="email" name="email" placeholder="Email" required>
+    </div>
 
-            <ul class="nav-links">
-                <li><a href="#">Home</a></li>
-                
-                <li class="dropdown">
-                    <a href="javascript:void(0)" class="dropbtn">Student Corner ▼</a>
-                    <div class="dropdown-content">
-                        <a href="register.html">Registration</a>
-                        <a href="index.html">Login</a>
-                    </div>
-                </li>
+    <div class="input-box"> 
+      <input type="password" class="input-field" id="password" name="password" placeholder="Password" required>
+    </div>
 
-                <li class="dropdown">
-                    <a href="javascript:void(0)" class="dropbtn">Company Corner ▼</a>
-                    <div class="dropdown-content">
-                        <a href="company-register.html">Registration</a>
-                        <a href="company-login.html">Login</a>
-                    </div>
-                </li>
+    <div class="forgot">
+      <section>
+        <input type="checkbox" id="check">
+        <label for="check">Remember me</label>
+      </section> 
+      <section>
+        <a href="forgot.html">Forgot password?</a> 
+      </section>
+    </div>
+    
+    <div class="input-submit">
+      <button type="submit" class="submit-btn">Sign In</button>
+    </div>
 
-                <li class="dropdown">
-                    <a href="javascript:void(0)" class="dropbtn hod-link">HOD Corner ▼</a>
-                    <div class="dropdown-content">
-                        <a href="HOD-login.html">Login</a>
-                    </div>
-                </li>
+    <div class="register">
+      <p>Don't have an account? 
+        <a href="register.html">Register</a>
+      </p>
+    </div>
 
-                <li class="dropdown">
-                    <a href="javascript:void(0)" class="dropbtn">Admin Corner ▼</a>
-                    <div class="dropdown-content">
-                        <a href="admin-login.html">Login</a>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </header>
+    <!-- 🔥 COMPANY LINK -->
+    
 
-    <main class="content-wrapper">
-        <section class="college-header">
-            <div class="logo-box">
-                <a href="/frontend/images/img4.png">
-                    <img src="images/img4.png" alt="College Logo" width="100%" height="100%">
-                </a>
-            </div>
-            <div class="college-names">
-                <h2>आदर्श प्रौद्योगिकी एवं विज्ञान संस्थान (बिलासपुर)</h2>
-                <h3>Adarsh Institute of Technology & Science (AITS)</h3>
-            </div>
-        </section>
+  </div>
+</form>
 
-        <section class="photo-slider">
-            <img src="images/img1.jpg" class="mySlides" style="display:none; width:100%; height:100%; object-fit:cover;">
-            <img src="images/img2.jpg" class="mySlides" style="display:none; width:100%; height:100%; object-fit:cover;">
-            <img src="images/img3.jpg" class="mySlides" style="display:none; width:100%; height:100%; object-fit:cover;">
-            <img src="images/img4.jpg" class="mySlides" style="display:none; width:100%; height:100%; object-fit:cover;">
-
-            <div class="slider-text">Some Auto Scroll Photos Section</div>
-        </section>
-
-        <section class="notification-panel">
-            <div class="panel-header" onclick="window.location.href='all-notices.html'">
-                <span class="header-title">📢 Notification Panel</span>
-                <span class="view-all-btn">VIEW ALL ↗</span>
-            </div>
-            
-            <div class="notif-container">
-                <marquee behavior="scroll" 
-                         direction="up" 
-                         scrollamount="4" 
-                         id="homeMarquee" 
-                         onmouseover="this.stop();" 
-                         onmouseout="this.start();">
-                    <div class="loading-text">Loading latest updates...</div>
-                </marquee>
-            </div>
-        </section>
-
-        <section class="placement-words">
-            <h2>Some Training & Placement Cell - Director's Message</h2>
-            <div class="message-content">
-                <p>
-                    "Our mission is to bridge the gap between academic excellence and industry requirements by 
-                    empowering students with the right skills and opportunities. We believe that every student 
-                    has unique potential, and our Training & Placement Cell works tirelessly to nurture it. 
-                    By collaborating with global industry leaders, we ensure that our graduates are not just 
-                    job-ready, but are future leaders equipped to handle the challenges of the ever-evolving 
-                    technological landscape. Through rigorous training programs, mock interviews, and industry 
-                    workshops, we strive to achieve 100% placement excellence every year."
-                </p>
-            </div>
-        </section>
-
-        <section class="important-links">
-            <h3>Important Links</h3>
-            <ul>
-                <li><a href="#">University Main Website</a></li>
-                <li><a href="#">Previous Year Statistics</a></li>
-                <li><a href="#">Download Placement Brochure</a></li>
-            </ul>
-        </section>
-    </main>
-
-    <footer class="footer">
-        <div class="footer-info">
-            <p><strong>Adarsh Institute of Technology & Science (AITS)</strong></p>
-            <p>Koni, Bilaspur, Chhattisgarh, 495009</p>
-            <p>About | Contact | Phone: +91-XXXX-XXXXXX</p>
-            <p>Email: placement@ggu.ac.in</p>
-        </div>
-    </footer>
-
-    <script src="/frontend/js/home.js"></script>
+<script src="./js/app.js"></script>
 </body>
 </html>
