@@ -14,7 +14,18 @@ const paymentRoutes = require('./routes/payment.route');
 const app = express();
 
 app.use(express.json());
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        "default-src": ["'self'"],
+        "connect-src": ["'self'", "https://placement-management-system-etjs.onrender.com", "http://localhost:3000"],
+        "script-src": ["'self'", "'unsafe-inline'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+      },
+    },
+  })
+);
 
 app.use(
   rateLimit({
