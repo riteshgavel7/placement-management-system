@@ -47,15 +47,11 @@ body {
 .nav-links li { position: relative; }
 
 .nav-links a {
-    color: white;
-    text-decoration: none;
-    padding: 0 15px;
-    height: 75px;
-    display: flex;
-    align-items: center;
-    font-weight: 500;
-    transition: 0.3s;
-}
+        height: auto;
+        padding: 15px 5%;
+        width: 100%;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
 
 .nav-links a:hover {
     background-color: #34495e;
@@ -63,13 +59,12 @@ body {
 
 /* Dropdown */
 .dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: white;
-    min-width: 180px;
-    top: 75px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-}
+        display: none;
+        position: static;
+        width: 100%;
+        background-color: #34495e;
+        box-shadow: none;
+    }
 
 .dropdown-content a {
     color: #333;
@@ -78,20 +73,16 @@ body {
     border-bottom: 1px solid #eee;
 }
 
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
+.dropdown:hover .dropdown-content,
+    .dropdown:active .dropdown-content {
+        display: block;
+    }
+    
 
 .college-header {
-    display: flex;
-    align-items: center;
-    justify-content: center; 
-    background: white;
-    padding: 30px 5%;
-    border-bottom: 1px solid #ddd;
-    gap: 30px;
-}
+        flex-direction: column;
+        text-align: center;
+    }
 
 .logo-box {
     width: 100px;
@@ -183,8 +174,10 @@ body {
         left: 0;
         width: 100%;
         background: #2c3e50;
+        z-index: 10001;
+        padding: 10px 0;
     }
-    .nav-links.active { display: flex; }
+   .nav-links.active { display: flex; }
     .college-header { flex-direction: column; text-align: center; }
     .college-names { text-align: center; }
 }
