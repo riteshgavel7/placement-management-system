@@ -187,11 +187,11 @@ body {
         display: none;
         flex-direction: column;
         position: relative!important; 
-        top: 0% !important;
+        top: 0% ;
         left: 0;
         width: 100%;
         background: #2c3e50;
-        z-index: 1000; /* Isse menu slider ke upar dikhega */
+        z-index: 10001; /* Isse menu slider ke upar dikhega */
     }
 
     .nav-links.active { 
