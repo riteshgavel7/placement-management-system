@@ -83,7 +83,7 @@ body {
     border: 1px solid #ddd;
 }
 
-.dropdown:hover .dropdown-content {
+.dropdown:active .dropdown-content {
     display: block;
 }
 
@@ -206,7 +206,7 @@ body {
         box-shadow: none;
     }
 
-    .dropdown:hover .dropdown-content,
+    .dropdown:active .dropdown-content,
     .dropdown:active .dropdown-content {
         display: block;
     }
