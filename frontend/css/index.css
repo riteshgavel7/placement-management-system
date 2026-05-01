@@ -191,7 +191,7 @@ body {
         left: 0;
         width: 100%;
         background: #2c3e50;
-        z-index: 1; 
+        z-index: 1000; /* Isse menu slider ke upar dikhega */
     }
 
     .nav-links.active { 
@@ -206,8 +206,9 @@ body {
         box-shadow: none;
     }
 
-    .dropdown.active .dropdown-content {
-        display: block !important;
+    .dropdown:hover .dropdown-content,
+    .dropdown:active .dropdown-content {
+        display: block;
     }
 
     .nav-links a {
