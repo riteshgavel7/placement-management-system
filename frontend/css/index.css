@@ -44,7 +44,9 @@ body {
     list-style: none;
 }
 
-.nav-links li { position: relative; }
+.nav-links li { 
+    position: relative; 
+}
 
 .nav-links a {
     color: white;
@@ -64,10 +66,11 @@ body {
 /* Dropdown */
 .dropdown-content {
     display: none;
-    position: absolute;
+    position: absolute; 
     background-color: white;
     min-width: 180px;
     top: 75px;
+    z-index: 1000;
     box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 
@@ -174,7 +177,10 @@ body {
 
 
 @media screen and (max-width: 992px) {
-    .menu-toggle { display: flex; }
+    .menu-toggle { 
+        display: flex; 
+    }
+
     .nav-links {
         display: none;
         flex-direction: column;
@@ -183,10 +189,41 @@ body {
         left: 0;
         width: 100%;
         background: #2c3e50;
+        z-index: 10001; /* Isse menu slider ke upar dikhega */
     }
-    .nav-links.active { display: flex; }
-    .college-header { flex-direction: column; text-align: center; }
-    .college-names { text-align: center; }
+
+    .nav-links.active { 
+        display: flex; 
+    }
+
+    .dropdown-content {
+        display: none;
+        position: static; /* Sabse zaroori: Isse overlap khatam hoga */
+        width: 100%;
+        background-color: #34495e; /* Dropdown ka alag rang */
+        box-shadow: none;
+    }
+
+    .dropdown:hover .dropdown-content,
+    .dropdown:active .dropdown-content {
+        display: block;
+    }
+
+    .nav-links a {
+        height: auto;
+        padding: 15px 20px;
+        width: 100%;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .college-header { 
+        flex-direction: column; 
+        text-align: center; 
+    }
+    
+    .college-names { 
+        text-align: center; 
+    }
 }
 /* Panel ka main dabba */
 .notification-panel {
