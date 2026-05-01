@@ -123,14 +123,14 @@ body {
 
 /* --- 3. Sections Style --- */
 .photo-slider {
-    width: 110%;
-    height: 300px;
-    background-color: #dcdde1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.2rem;
-    color: #7f8c8d;
+    width: 100%;           /* 110% ko 100% karein */
+    max-width: 1600px;     /* Notification panel ki tarah max-width dein */
+    margin: 20px auto;     /* Ise center mein karne ke liye auto margin dein */
+    height: 400px;         /* Height thodi badha sakte hain */
+    background-color: #000;
+    position: relative;
+    overflow: hidden;      /* Images bahar na dikhein */
+    border-radius: 8px;    /* Corners ko panel ki tarah round karein */
 }
 
 
@@ -195,7 +195,7 @@ body {
     background: white;
     border-radius: 8px;
     overflow: hidden;
-    max-width: 1600px; /* Isse width control hogi */
+    max-width: 1600px; 
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
