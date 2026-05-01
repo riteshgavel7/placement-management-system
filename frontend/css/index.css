@@ -83,8 +83,8 @@ body {
     border: 1px solid #ddd;
 }
 
-.dropdown:active .dropdown-content {
-    display: block;
+dropdown.active .dropdown-content {
+    display: block !important;
 }
 
 
@@ -200,9 +200,9 @@ body {
 
     .dropdown-content {
         display: none;
-        position: static; /* Sabse zaroori: Isse overlap khatam hoga */
+        position: static; 
         width: 100%;
-        background-color: #34495e; /* Dropdown ka alag rang */
+        background-color: #34495e; 
         box-shadow: none;
     }
 
