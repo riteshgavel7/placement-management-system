@@ -77,8 +77,8 @@ body {
 
 .dropdown-content a {
     color: #fa0606;
-    padding: 15px 30px !important;
-    height: auto !important;
+    padding: 12px 16px;
+    height: auto;
     border-bottom: 1px solid #eee;
     border: 1px solid #ddd;
 }
