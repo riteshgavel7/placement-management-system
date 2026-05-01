@@ -55,8 +55,8 @@ if (getOtpBtn) {
         }
        const files = document.querySelectorAll('input[type="file"]');
 
-for (let fileInput of files) {
-    if (fileInput.files.length > 0) {
+       for (let fileInput of files) {
+         if (fileInput.files.length > 0) {
         const fileSize = fileInput.files[0].size; 
         
         
