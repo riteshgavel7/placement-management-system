@@ -156,8 +156,8 @@ const approveStudent = async (req, res) => {
         );
 
         if (!student) {
-            console.log("Student nahi mila database mein");
-            return res.status(404).json({ message: "Student nahi mila" });
+            console.log("Student not found in database");
+            return res.status(404).json({ message: "Student not found" });
         }
 
         console.log("Database Updated Successfully:", student.status);

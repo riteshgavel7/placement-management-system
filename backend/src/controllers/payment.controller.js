@@ -19,7 +19,7 @@ const createOrder = async (req, res) => {
             isPaid: true 
         });
         
-        if (existingStudent) return res.status(400).json({ message: "Bhai, ye details pehle hi registered hain!" });
+        if (existingStudent) return res.status(400).json({ message: "Student already exists" });
 
         // Razorpay Order
         const order = await razorpay.orders.create({
@@ -32,7 +32,7 @@ const createOrder = async (req, res) => {
 
     } catch (err) {
         console.error("Order Error:", err);
-        res.status(500).json({ message: "Payment start nahi ho paya." });
+        res.status(500).json({ message: "Payment error occurred." });
     }
 };
 

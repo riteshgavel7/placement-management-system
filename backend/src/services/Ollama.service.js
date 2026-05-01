@@ -1,7 +1,5 @@
-const Groq = require("groq-sdk");
+const axios = require('axios');
 require('dotenv').config(); 
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 exports.analyzeResume = async (resumeText, job, studentProfile = {}) => {
   try {
@@ -9,7 +7,6 @@ exports.analyzeResume = async (resumeText, job, studentProfile = {}) => {
         return { score: 0, decision: "reject", reason: "Resume text missing or unreadable." };
     }
 
-    
     const prompt = `
   [STRICT TECHNICAL AUDIT MODE - NO ASSUMPTIONS ALLOWED]
   
@@ -48,37 +45,43 @@ exports.analyzeResume = async (resumeText, job, studentProfile = {}) => {
     "reason": "A 4-5 sentence technical audit. Must mention: 'Missing: [skills]', 'Academic Score: [score]', and 'Project Feedback: [feedback]'. Be direct and harsh if the candidate is not a fit."
   }
 `;
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [
-        { role: "system", content: "You are a highly analytical ATS system that provides varied scores based on merit. No generic scoring." },
-        { role: "user", content: prompt }
-      ],
-      model: "llama-3.3-70b-versatile",
-      response_format: { type: "json_object" },
-      temperature: 0.2
+
+    const response = await axios.post('http://localhost:11434/api/generate', {
+      model: "llama3.1",
+      system: `Analyze ${studentProfile.name} ONLY. Do not use info from previous candidates. Provide scores based on ${job.description}.`,
+      prompt: prompt,
+      stream: false,
+      format: "json",
+      options: {
+        temperature: 0.4, // Kam temperature = Zyada accuracy
+        num_predict: 800 
+      }
     });
 
-    let result = JSON.parse(chatCompletion.choices[0].message.content);
+    let result = JSON.parse(response.data.response);
 
-    // LOGIC UPDATE: Jinka 65 ya upar hai, wo Select honge
+    // Score and Reason Safety
     const safeScore = Number(result.score) || 0;
-    const safeDecision = safeScore >= 65 ? "SELECT" : "REJECT"; 
-    const safeReason = result.reason || `Analysis complete with score ${safeScore}.`;
+    const finalDecision = safeScore >= 65 ? "selected" : "rejected"; // Framework match
+    
+    let safeReason = result.reason;
+    if (Array.isArray(safeReason)) safeReason = safeReason.join(" ");
+    if (typeof safeReason === 'object') safeReason = JSON.stringify(safeReason);
 
-    console.log(`\n--------------------------------------------`);
+    console.log(`\n--- [OLLAMA LOCAL ANALYSIS] ---`);
     console.log(`🎯 CANDIDATE: ${studentProfile.name}`);
-    console.log(`🔢 ATS SCORE: ${safeScore}/100 | [${safeDecision}]`);
+    console.log(`🔢 ATS SCORE: ${safeScore}/100 | [${finalDecision.toUpperCase()}]`);
     console.log(`📝 FEEDBACK: ${safeReason}`);
-    console.log(`--------------------------------------------\n`);
+    console.log(`-------------------------------\n`);
     
     return {
         score: safeScore,
-        decision: safeDecision.toLowerCase(),
+        decision: finalDecision,
         reason: safeReason
     };
 
   } catch (error) {
-    console.error("❌ AI Error:", error.message);
-    return { score: 0, decision: "reject", reason: "Process failed." };
+    console.error("❌ Ollama Service Error:", error.message);
+    return { score: 0, decision: "reject", reason: `Local processing failed.` };
   }
 };

@@ -5,7 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Registration - Placement Portal</title>
     <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Razorpay SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <!-- PDF Generation Libraries (Correct Order) -->
+    <!-- 1. Core jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- 2. autoTable Plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    
 </head>
 
 <body>
@@ -48,11 +58,26 @@
 </div>
 
 <div class="div-input">
-    <input type="number" name="twelfthMarks" placeholder="Class 12th Percentage / Marks" step="0.01" required>
+    <input 
+        type="number" 
+        name="twelfthMarks" 
+        placeholder="Class 12th Percentage (e.g. 85.50)" 
+        step="0.01" 
+        min="0" 
+        max="100" 
+        required
+    >
 </div>
 
 <div class="div-input">
-    <input type="text" name="twelfthPassingYear" placeholder="12th Passing Year (e.g. 2022)" required>
+    <input 
+        type="number" 
+        name="twelfthPassingYear" 
+        id="twelfthPassingYear" 
+        placeholder="12th Passing Year (e.g. 2022)" 
+        min="2000" 
+        required
+    >
 </div>
 
             <div class="div-input">
@@ -81,8 +106,8 @@
             </div>
 
             <div class="div-input">
-                <p style="font-size: 11px; margin-bottom: 2px; color: #888; text-align: left;">Resume (PDF):</p>
-                <input type="file" name="resume" accept=".pdf" required>
+               <p style="font-size: 11px; margin-bottom: 2px; color: #888; text-align: left;">Resume (PDF/DOC):</p>
+                <input type="file" name="resume" accept=".pdf,.doc,.docx" required>
             </div>
 
             <button type="button" id="getOtpBtn" class="submit-btn" style="margin-top: 10px;">Get OTP to Register</button>
@@ -102,7 +127,7 @@
 
 </div>
 
-<script src="js/app.js"></script>
+<script src="js/app.js" defer></script>
 
 </body>
 </html>

@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadDynamicNotices() {
     const marquee = document.getElementById("homeMarquee");
     if (!marquee) {
-        console.error("Marquee element 'homeMarquee' nahi mila!");
+        console.error("DOM Error: Marquee element 'homeMarquee' not found.");
         return;
     }
 
@@ -35,13 +35,13 @@ async function loadDynamicNotices() {
         console.log("Fetching notices...");
         const res = await fetch("http://localhost:3000/api/admin/notices");
         
-        if (!res.ok) throw new Error("Server response thik nahi hai");
+        if (!res.ok) throw new Error("Invalid server response.");
         
         const notices = await res.json();
         console.log("Notices Data:", notices); 
 
         if (notices.length === 0) {
-            marquee.innerHTML = "Abhi koi naya notice nahi hai.";
+            marquee.innerHTML = "Currently, there are no new notices available.";
             return;
         }
 
@@ -66,7 +66,7 @@ async function loadDynamicNotices() {
 
     } catch (err) {
         console.error("Notice load error:", err);
-        marquee.innerHTML = "Notices load karne mein error aaya.";
+        marquee.innerHTML = "Unable to load notices. Please refresh the page.";
     }
 }
 document.addEventListener("DOMContentLoaded", loadDynamicNotices);

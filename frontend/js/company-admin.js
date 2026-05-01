@@ -14,7 +14,7 @@ window.fetchPendingCompanies = async function() {
 
         if (!tbody) return;
         if (companies.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='5' align='center'>No data.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='5' align='center'>No pending company registration requests found..</td></tr>";
             return;
         }
 
@@ -51,9 +51,9 @@ window.updateCompanyStatus = async function(id, action) {
             alert(`Company ${action}ed successfully!`);
             fetchPendingCompanies(); // Refresh table
         } else {
-            alert("Action failed!");
+            alert("Operation failed. Unable to update company status.");
         }
     } catch (err) {
-        alert("Server error!");
+        alert("Internal Server Error. Please contact the technical support team.");
     }
 }

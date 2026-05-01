@@ -155,7 +155,7 @@ const getApplicants = async (req, res) => {
 
     // 🔥 MAIN FIX: HOD ko yahan allow karo
     if (userRole !== "admin" && userRole !== "hod" && !isOwner) {
-      return res.status(403).json({ message: "Access Denied: Permission nahi hai" });
+      return res.status(403).json({ message: "Access Denied: Permission not available" });
     }
 
     res.status(200).json({

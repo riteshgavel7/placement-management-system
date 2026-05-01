@@ -35,7 +35,7 @@ if (adminLoginForm) {
             } else {
                 alert(data.message || "Invalid Credentials");
             }
-        } catch (error) { alert("Server error!"); }
+        } catch (error) { alert("Internal server error. Please try again later."); }
     });
 }
 
@@ -244,7 +244,7 @@ window.openAnalysis = (jobId) => { localStorage.setItem("selectedJobId", jobId);
 // ================== EXPORT ==================
 async function exportData() {
     const token = getAdminToken();
-    if (!token) return alert("Session expired.");
+    if (!token) return alert("Session expired. Please log in again to continue.");
     const btn = document.querySelector(".submit-btn");
     const originalText = btn?.innerHTML;
     try {
@@ -311,7 +311,7 @@ window.loadAdminModal = async function(id) {
         // Exact Postman response extraction
         let s = response.data ? response.data : (Array.isArray(response) ? response.find(st => st._id === id) : response);
 
-        if (!s) return alert("Student data not found!");
+        if (!s) return alert("Record not found. The requested student data is unavailable.");
 
         // Bulletproof safeSet (Fixes the issue with 0 or floating point numbers getting erased)
         const safeSet = (elementId, value) => {
@@ -383,7 +383,7 @@ window.loadAdminModal = async function(id) {
         document.getElementById('editModal').style.display = 'block';
     } catch (err) { 
         console.error("Load Error Details:", err);
-        alert("Data fetch error! Check console."); 
+       alert("Synchronisation error. Unable to retrieve record details.");
     }
 }
 
@@ -419,7 +419,7 @@ window.saveAdminEdit = async function() {
             const d = await res.json(); 
             alert("Error: " + d.message); 
         }
-    } catch (err) { alert("Server Error!"); }
+    } catch (err) { alert("Network error. Unable to communicate with the server."); }
 }
 
 function filterUpdateTable() {
@@ -435,7 +435,7 @@ function filterUpdateTable() {
 
 window.closeModal = () => { document.getElementById('editModal').style.display = 'none'; };
 function logout() { 
-    if (confirm("Logout karein?")) { 
+    if (confirm("Are you sure you want to terminate the current session?")) { 
         localStorage.clear(); 
         window.location.replace("admin-login.html"); // Updated here
     } 

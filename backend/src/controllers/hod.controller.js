@@ -30,7 +30,7 @@ const createHOD = async (req, res) => {
 // 2. Get All HODs (List dikhane ke liye)
 const getAllHODs = async (req, res) => {
     try {
-        const hods = await HOD.find().select('-password'); // Password chupa kar data bhejenge
+        const hods = await HOD.find().select('-password'); 
         res.json(hods);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -77,13 +77,13 @@ const deleteHOD = async (req, res) => {
         // 1. Check if HOD exists
         const hod = await HOD.findOne({ email });
         if (!hod) {
-            return res.status(404).json({ message: "HOD nahi mila! Email check karein." });
+            return res.status(404).json({ message: "HOD not found" });
         }
 
         // 2. Compare Password
         const isMatch = await bcrypt.compare(password, hod.password);
         if (!isMatch) {
-            return res.status(401).json({ message: "Galat Password, phir se koshish karein!" });
+            return res.status(401).json({ message: "Invalid password" });
         }
 
         // 3. Create JWT Token
@@ -121,7 +121,7 @@ const updateStudentData = async (req, res) => {
         
         // 1. Pehle Student ko dhundo
         const student = await Student.findById(id);
-        if (!student) return res.status(404).json({ message: "Student nahi mila!" });
+        if (!student) return res.status(404).json({ message: "Student not found" });
 
         // 2. Data handle karo (Body se text lo)
         let updates = { ...req.body }; 
@@ -153,7 +153,7 @@ const updateStudentData = async (req, res) => {
 
         // 4. Role based data update
         if (role === 'HOD') {
-            if (student.hodEditCount >= 2) return res.status(403).json({ message: "Limit khatam!" });
+            if (student.hodEditCount >= 2) return res.status(403).json({ message: "Limit exceeded" });
 
             const allowedFields = ['name', 'mobile', 'rollNo', 'enrollmentNo', 'twelfthMarks', 'twelfthPassingYear', 'gender','isVerified'];
 

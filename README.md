@@ -1,2 +1,0 @@
-# placement-management-system
-

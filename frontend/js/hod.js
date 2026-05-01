@@ -21,7 +21,7 @@ document.getElementById('hodLoginForm').addEventListener('submit', async (e) => 
         if (response.ok) {
             // LocalStorage mein save karne se pehle check karein
             if (!data.token || !data.hod) {
-                alert("Login failed: Backend did not return token or hod info");
+                alert("Authentication Error: Account details could not be retrieved. Please contact the administrator.");
                 return;
             }
 

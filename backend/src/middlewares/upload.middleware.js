@@ -1,24 +1,25 @@
 const multer = require("multer");
 
-// memory storage (for cloud / buffer use)
 const storage = multer.memoryStorage();
 
-// file filter
 const fileFilter = (req, file, cb) => {
   const isPDF = file.mimetype === "application/pdf";
   const isImage = file.mimetype.startsWith("image/");
+  const isDoc = 
+    file.mimetype === "application/msword" || 
+    file.mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-  if (isPDF || isImage) {
+  if (isPDF || isImage || isDoc) {
     cb(null, true);
   } else {
-    cb(new Error("Only PDF and Images allowed"), false);
+    cb(new Error("Only PDF, Images, and Word documents allowed"), false);
   }
 };
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 1 * 1024 * 1024 },
 });
 
 module.exports = upload;

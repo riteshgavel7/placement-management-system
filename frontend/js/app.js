@@ -1,16 +1,13 @@
 const loginForm = document.getElementById("loginForm");
 const registerForm = document.getElementById("registerForm");
-const profileForm = document.getElementById("profileForm");
 const getOtpBtn = document.getElementById("getOtpBtn");
 const otpSection = document.getElementById("otpSection");
 
 let serverOtp = "";
 
 const API_BASE = "http://localhost:3000/api/students";
-const API_JOB = "http://localhost:3000/api/jobs/all";
-const API_APPLY = "http://localhost:3000/api/jobs/apply";
 
-// ================= LOGIN  =================
+// ================= LOGIN SECTION =================
 if (loginForm) {
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -26,156 +23,236 @@ if (loginForm) {
         localStorage.setItem("token", json.token);
         window.location.href = "profile.html";
       } else {
-        alert(json.message || "Login failed");
+        alert(json.message || "Invalid credentials. Please try again.");
       }
     } catch (error) {
-      console.error(error);
-      alert("Server error");
+      alert("Server is currently unreachable. Please try again later.");
     }
   });
 }
 
+// --- DYNAMIC YEAR LIMIT ---
+const currentYear = new Date().getFullYear();
+const yearInput = document.getElementById('twelfthPassingYear');
+if (yearInput) yearInput.max = currentYear;
 
-// ================= STEP 1: GET OTP (FIXED WITH IF CHECK) =======================
+// ================= STEP 1: OTP REQUEST =======================
 if (getOtpBtn) {
-  getOtpBtn.onclick = async () => {
-      const emailElem = document.getElementById("regEmail");
-      const enrollElem = document.getElementById("enrollmentNo");
-  
-      if (!emailElem || !enrollElem) {
-          return alert("Critical Error: HTML inputs mein ID 'regEmail' ya 'enrollmentNo' missing hai!");
-      }
-  
-      const email = emailElem.value;
-      const enrollmentNo = enrollElem.value;
-  
-      if (!email || !enrollmentNo) {
-          return alert("Pehle Email aur Enrollment Number bharo!");
-      }
-  
-      getOtpBtn.innerText = "Sending OTP...";
-      getOtpBtn.disabled = true;
-  
-      try {
-          const res = await fetch("http://localhost:3000/api/students/send-otp", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email, enrollmentNo, type: "register" }),
-          });
-          
-          if (!res.ok) {
-              const errorData = await res.json();
-              throw new Error(errorData.message || "OTP send karne mein error");
-          }
-  
-          const data = await res.json();
-          serverOtp = data.tempOtp; 
-          alert("OTP bhej diya gaya hai!");
-          if (otpSection) otpSection.style.display = "block";
-          getOtpBtn.style.display = "none"; 
-  
-      } catch (err) {
-          alert("Error: " + err.message);
-          getOtpBtn.innerText = "Get OTP to Register";
-          getOtpBtn.disabled = false;
-      }
-  };
-}
+    getOtpBtn.onclick = async () => {
+        const emailElem = document.getElementById("regEmail");
+        const enrollElem = document.getElementById("enrollmentNo");
+        const marksElem = document.querySelector('input[name="twelfthMarks"]');
+        const yearElem = document.getElementById("twelfthPassingYear");
 
-// ================= STEP 2: REGISTER + PAYMENT (FIXED WITH IF CHECK) =======================
-if (registerForm) {
-  registerForm.onsubmit = async (e) => {
-    e.preventDefault();
-    
-    const userOtpElem = document.getElementById("regOtp");
-    const userOtp = userOtpElem ? userOtpElem.value : "";
-
-    if (userOtp !== serverOtp) {
-        return alert("Bhai galat OTP hai, check kar ke phir se daal!");
-    }
-
-    try {
-        const orderRes = await fetch("http://localhost:3000/api/payment/create-order", { 
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                email: document.getElementById("regEmail").value,
-                enrollmentNo: document.getElementById("enrollmentNo").value,
-                rollNo: document.getElementById("rollNo").value
-            })
-        });
-
-        const order = await orderRes.json();
-
-        if (!orderRes.ok) {
-            alert(order.message); 
-            return; 
-        }
-
-        // --- BYPASS LOGIC: Agar Amount 0 hai ya isFree true hai ---
-        if (order.isFree || order.amount === 0) {
-            alert("Free Registration! Details upload ho rahi hain...");
-            // Seedha register API call bina Razorpay popup ke
-            return handleFinalRegistration(null); 
-        }
-
-        // --- RAZORPAY FLOW: Wahi purana options object ---
-        const options = {
-            key: "rzp_test_Sh0enw3UAfHi0P", 
-            amount: order.amount,
-            currency: "INR",
-            name: "Placement Portal",
-            order_id: order.id,
-            handler: async function (response) {
-                alert("Payment Success! Details upload ho rahi hain...");
-                handleFinalRegistration(response); // Logic ko function mein move kar diya
-            },
-            modal: { ondismiss: function() { alert("Payment window closed."); } },
-            theme: { color: "#222" }
-        };
+        if (!emailElem || !enrollElem) return alert("System Error: Required form fields are missing.");
         
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-
-    } catch (err) { alert("System Error: " + err.message); }
-  };
+        if (yearElem && parseInt(yearElem.value) > currentYear) {
+            return alert("Validation Error: 12th Passing Year cannot be in the future.");
+        }
+        if (marksElem && (parseFloat(marksElem.value) > 100 || parseFloat(marksElem.value) < 0)) {
+            return alert("Validation Error: Percentage must be between 0 and 100.");
+        }
+        const files = document.querySelectorAll('input[type="file"]');
+for (let fileInput of files) {
+    if (fileInput.files.length > 0) {
+        const fileSize = fileInput.files[0].size / 1024 / 1024; // MB mein convert kiya
+        if (fileSize > 1) {
+    alert(`Validation Error: The file "${fileInput.name}" exceeds the 1MB limit. Please upload a smaller file.`); 
+    return;
+}
+    }
 }
 
-// Yeh function payment response ke baad registration details ko final submit karega
+        getOtpBtn.innerText = "Processing...";
+        getOtpBtn.disabled = true;
+
+        try {
+            const res = await fetch(`${API_BASE}/send-otp`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: emailElem.value, enrollmentNo: enrollElem.value, type: "register" }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to send OTP.");
+
+            serverOtp = data.tempOtp;
+            alert("Verification OTP has been sent to your registered email.");
+            if (otpSection) otpSection.style.display = "block";
+            getOtpBtn.style.display = "none";
+
+        } catch (err) {
+            alert("Error: " + err.message);
+            getOtpBtn.innerText = "Get OTP to Register";
+            getOtpBtn.disabled = false;
+        }
+    };
+}
+
+// ================= STEP 2: REGISTER & PAYMENT FLOW =======================
+if (registerForm) {
+    registerForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const userOtp = document.getElementById("regOtp")?.value || "";
+
+        if (userOtp !== serverOtp) {
+            return alert("Invalid OTP. Please verify the code sent to your email.");
+        }
+
+        try {
+            const orderRes = await fetch("http://localhost:3000/api/payment/create-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: document.getElementById("regEmail").value,
+                    enrollmentNo: document.getElementById("enrollmentNo").value,
+                    rollNo: document.getElementById("rollNo").value
+                })
+            });
+
+            const order = await orderRes.json();
+            if (!orderRes.ok) return alert(order.message);
+
+            if (order.isFree || order.amount === 0) {
+                alert("Free registration eligibility confirmed. Processing details...");
+                return handleFinalRegistration(null);
+            }
+
+            const options = {
+                key: "rzp_test_Sh0enw3UAfHi0P",
+                amount: order.amount,
+                currency: "INR",
+                name: "Placement Portal",
+                order_id: order.id,
+                handler: (res) => handleFinalRegistration(res),
+                modal: { ondismiss: () => alert("Transaction cancelled by user.") },
+                theme: { color: "#1a1a1a" }
+            };
+
+            new window.Razorpay(options).open();
+        } catch (err) { alert("Transaction Error: " + err.message); }
+    };
+}
+
+// ================= STEP 3: FINAL SUBMISSION =======================
 async function handleFinalRegistration(response) {
     const formData = new FormData(registerForm);
-    
+
     if (response) {
-        // PAID FLOW
         formData.append("razorpay_payment_id", response.razorpay_payment_id);
         formData.append("razorpay_order_id", response.razorpay_order_id);
         formData.append("razorpay_signature", response.razorpay_signature);
         formData.append("payment_mode", "PAID");
     } else {
-        // FREE FLOW
         formData.append("payment_mode", "FREE");
-        // Kuch dummy values taaki backend verification crash na ho
-        formData.append("razorpay_payment_id", "FREE_PAY_ID");
+        formData.append("razorpay_payment_id", "FREE_REG_ID");
         formData.append("razorpay_order_id", "FREE_ORDER_ID");
         formData.append("razorpay_signature", "FREE_SIGNATURE");
     }
 
-    const finalRes = await fetch("http://localhost:3000/api/students/register", {
-        method: "POST",
-        body: formData 
-    });
+    try {
+        const finalRes = await fetch(`${API_BASE}/register`, {
+            method: "POST",
+            body: formData
+        });
+
+        if (finalRes.ok) {
+            alert("Registration successful! Your digital receipt is being generated.");
+            generateReceipt(formData, response ? response.razorpay_payment_id : "FREE_REGISTRATION");
+            setTimeout(() => window.location.href = "index.html", 3000);
+        } else {
+            const finalData = await finalRes.json();
+            alert("Registration Error: " + finalData.message);
+        }
+    } catch (err) { alert("Submission Error: " + err.message); }
+}
+
+
+// ================= FINAL PDF RECEIPT GENERATOR =======================
+async function generateReceipt(formData, paymentId) {
+    console.log("Initializing PDF Generation...");
+
+    // 1. Library Access Logic (Handling Modern Namespace)
+    const lib = window.jspdf;
     
-    const finalData = await finalRes.json();
-    if(finalRes.ok) {
-        alert("Registration Successful!");
-        window.location.href = "index.html";
-    } else {
-        // Agar yahan "Fraud Detected" aa raha hai, toh niche backend wala change karo
-        alert("Error: " + finalData.message);
+    if (!lib || !lib.jsPDF) {
+        console.error("jsPDF not found. Retrying once...");
+        // Agar library load hone mein thoda waqt le rahi hai
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert("Registration Successful!. Please check your internet or refresh.");
+        return;
+    }
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const date = new Date().toLocaleDateString('en-GB');
+
+        // --- Design: Header ---
+        doc.setFillColor(26, 26, 26); // Dark Gray
+        doc.rect(0, 0, 210, 40, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.text("PLACEMENT PORTAL", 105, 20, { align: "center" });
+        
+        doc.setFontSize(10);
+        doc.text("Official Registration Confirmation Receipt", 105, 30, { align: "center" });
+
+        // --- Data Preparation ---
+        const tableData = [
+            ['Student Name', formData.get("name") || 'N/A'],
+            ['Enrollment No', formData.get("enrollmentNo") || 'N/A'],
+            ['Roll Number', formData.get("rollNo") || 'N/A'],
+            ['Department', formData.get("department") || 'N/A'],
+            ['Transaction ID', paymentId || 'N/A'],
+            ['Date of Issue', date],
+            ['Payment Status', formData.get("payment_mode") || 'SUCCESS']
+        ];
+
+        // --- Table Logic (AutoTable) ---
+        if (typeof doc.autoTable === 'function') {
+            doc.autoTable({
+                startY: 50,
+                head: [['Field', 'Description']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [40, 40, 40], textColor: [255, 255, 255] },
+                styles: { fontSize: 10, cellPadding: 5 },
+                alternateRowStyles: { fillColor: [245, 245, 245] },
+                margin: { left: 15, right: 15 }
+            });
+        } else {
+            // Fallback: Agar AutoTable plugin load nahi hua toh simple text
+            doc.setTextColor(0, 0, 0);
+            let y = 60;
+            tableData.forEach(item => {
+                doc.text(`${item[0]}: ${item[1]}`, 20, y);
+                y += 10;
+            });
+        }
+
+        // --- Footer ---
+        const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 150;
+        doc.setFontSize(9);
+        doc.setTextColor(100);
+        doc.text("This is a computer-generated receipt and does not require a physical signature.", 105, finalY, { align: "center" });
+
+        // --- Save PDF ---
+        const fileName = `Receipt_${formData.get("enrollmentNo") || 'Student'}.pdf`;
+        doc.save(fileName);
+        console.log("PDF Saved Successfully: " + fileName);
+
+    } catch (err) {
+        console.error("Critical PDF Logic Error:", err);
+        alert("Registration Success! Receipt generation failed. Please check your internet or refresh.");
     }
 }
 
-// ================= FORGOT PASSWORD =================
+// ================= PASSWORD RECOVERY =================
 const emailForm = document.getElementById("emailForm");
 const otpForm = document.getElementById("otpForm");
 
@@ -183,26 +260,24 @@ if (emailForm) {
   emailForm.onsubmit = async (e) => { 
     e.preventDefault();
     const emailElem = document.getElementById("email");
-    const emailInput = emailElem ? emailElem.value : "";
     try {
       const res = await fetch(`${API_BASE}/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailInput, type: "forget" }),
+        body: JSON.stringify({ email: emailElem.value, type: "forget" }),
       });
       const data = await res.json();
       if (res.ok) {
-        alert("OTP bhej diya gaya hai!");
+        alert("A recovery OTP has been sent to your email.");
         serverOtp = data.tempOtp; 
-        localStorage.setItem("resetEmail", emailInput);
+        localStorage.setItem("resetEmail", emailElem.value);
         emailForm.style.display = "none";
         if (otpForm) otpForm.style.display = "block";
       } else {
-        alert(data.message || "Error sending OTP");
+        alert(data.message || "Failed to initiate password reset.");
       }
     } catch (err) {
-      console.error(err);
-      alert("Server error");
+      alert("Server Error: Unable to process request.");
     }
   };
 }
@@ -211,13 +286,11 @@ if (otpForm) {
   otpForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = localStorage.getItem("resetEmail");
-    const otpInput = document.getElementById("otp");
-    const passInput = document.getElementById("newPassword");
-    const userEnteredOtp = otpInput ? otpInput.value : "";
-    const newPassword = passInput ? passInput.value : "";
+    const userEnteredOtp = document.getElementById("otp")?.value || "";
+    const newPassword = document.getElementById("newPassword")?.value || "";
 
     if (userEnteredOtp !== serverOtp) {
-       return alert("Bhai OTP galat hai! Email check karo.");
+       return alert("Incorrect OTP. Access denied.");
     }
 
     try {
@@ -226,28 +299,26 @@ if (otpForm) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp: userEnteredOtp, password: newPassword })
       });
-      const data = await res.json();
       if (res.ok) {
-        alert("Password reset ho gaya! Ab login karo.");
+        alert("Password updated successfully. You can now log in.");
         localStorage.removeItem("resetEmail");
         window.location.href = "index.html";
       } else {
+        const data = await res.json();
         alert(data.message);
       }
     } catch (err) {
-      console.error(err);
-      alert("Server error");
+      alert("Error: Password reset failed.");
     }
   });
 }
+  
+// ================= PROFILE MANAGEMENT =================
 
-// ================= PROFILE & LOGOUT =================
-
-// 1. Page Load Check: Sirf profile.html par hi trigger hoga
 if (window.location.pathname.includes("profile.html")) {
     const token = localStorage.getItem("token");
     if (!token) {
-        window.location.replace("index.html"); // .replace use karne se back button loop nahi banta
+        window.location.replace("index.html");
     } else {
         loadProfile();
     }
@@ -268,29 +339,20 @@ async function loadProfile() {
 
         const data = await res.json();
 
-        // Agar token expire ho gaya ya unauthorized hai
         if (res.status === 401 || res.status === 403) {
             localStorage.removeItem("token");
             window.location.replace("index.html");
             return;
         }
 
-        if (!res.ok) {
-            console.error("Profile fetch failed:", data.message);
-            return;
-        }
-
-        // Backend response se student object nikalna
         const s = data.student;
         if (!s) return;
 
-        // --- Helper: UI mein text set karne ke liye ---
         const setUI = (id, val) => {
             const el = document.getElementById(id);
-            if (el) el.innerText = val || "-";
+            if (el) el.innerText = val || "N/A";
         };
 
-        // --- Data Mapping ---
         setUI("name", s.name);
         setUI("email", s.email);
         setUI("mobile", s.mobile);
@@ -300,39 +362,34 @@ async function loadProfile() {
         setUI("course", s.course);
         setUI("batch", s.batch);
         setUI("gender", s.gender);
-        setUI("twelfthMarks", s.twelfthMarks ? s.twelfthMarks + "%" : "-");
+        setUI("twelfthMarks", s.twelfthMarks ? s.twelfthMarks + "%" : "N/A");
         setUI("twelfthPassingYear", s.twelfthPassingYear);
         setUI("paymentId", s.paymentId);
-        setUI("isVerifiedBadge", s.isVerified ? "Verified ✅" : "Pending ⏳");
+        setUI("isVerifiedBadge", s.isVerified ? "Verified ✅" : "Verification Pending ⏳");
 
-        // --- Status Badge ---
         const statusElem = document.getElementById("status");
         if (statusElem) {
             statusElem.innerText = (s.status || "pending").toUpperCase();
             statusElem.className = `status-badge ${s.status.toLowerCase()}`;
         }
 
-        // --- Links & Images ---
         const resElem = document.getElementById("resume");
         if (resElem) {
             resElem.href = s.resume || "#";
-            if (!s.resume) resElem.style.pointerEvents = "none"; // Resume nahi hai to link disable
         }
 
         const picElem = document.getElementById("profilePic");
         if (picElem) {
             picElem.src = s.profilePicture || "default-avatar.png";
-            picElem.onerror = () => { picElem.src = "default-avatar.png"; };
         }
 
     } catch (error) {
-        console.error("Profile load error:", error);
+        console.error("Profile synchronization error:", error);
     }
 }
 
-// Logout Function
 function logout() {
-    if (confirm("Kya aap logout karna chahte hain?")) {
+    if (confirm("Are you sure you want to terminate the current session?")) {
         localStorage.removeItem("token");
         window.location.replace("index.html");
     }

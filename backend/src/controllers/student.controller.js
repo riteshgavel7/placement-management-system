@@ -6,34 +6,48 @@ const nodemailer = require("nodemailer");
 const crypto = require('crypto');
 
 // ======================
-// REGISTER
+// GLOBAL MAIL TRANSPORTER
 // ======================
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS 
+  }
+});
 
+// ======================
+// REGISTER STUDENT
+// ======================
 const registerStudent = async (req, res) => {
   try {
-    if (!req.files || !req.files.resume || !req.files.profilePicture) {
-      return res.status(400).json({ message: "Resume aur Profile Picture dono zaroori hain!" });
-    }
-
     const { 
       name, email, password, mobile, enrollmentNo, rollNo, 
       department, batch, course,
       twelfthMarks, twelfthPassingYear, gender, 
       razorpay_order_id, razorpay_payment_id, razorpay_signature,
-      payment_mode // <--- Frontend se ye flag pakda
+      payment_mode 
     } = req.body;
 
-    // --- STEP 1: PAYMENT VERIFICATION (Only if NOT Free) ---
+    // --- STEP 0: VALIDATION ---
+    const currentYear = new Date().getFullYear();
+    if (Number(twelfthPassingYear) > currentYear) {
+      return res.status(400).json({ message: "Validation Error: 12th Passing Year cannot be in the future." });
+    }
+
+    if (!req.files || !req.files.resume || !req.files.profilePicture) {
+      return res.status(400).json({ message: "Required files (Resume/Profile Picture) are missing." });
+    }
+
+    // --- STEP 1: PAYMENT VERIFICATION  ---
     if (payment_mode !== "FREE") {
         const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET);
         hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
         const generated_signature = hmac.digest('hex');
 
         if (generated_signature !== razorpay_signature) {
-          return res.status(400).json({ message: "Payment verification failed! Fraud detected." });
+          return res.status(400).json({ message: "Payment verification failed. Potential unauthorized transaction detected." });
         }
-    } else {
-        console.log("Free Registration Flow: Skipping signature check.");
     }
 
     // --- STEP 2: DUPLICATE CHECK ---
@@ -43,10 +57,10 @@ const registerStudent = async (req, res) => {
     });
 
     if (paidExist) {
-      return res.status(400).json({ message: "Bhai, ye Enrollment ya Email pehle se Registered aur Paid hai!" });
+      return res.status(400).json({ message: "A registered account already exists with these credentials." });
     }
 
-    // --- STEP 3: KACHRA SAAF KARO ---
+    // --- STEP 3: CLEANUP UNPAID ATTEMPTS ---
     await Student.deleteMany({ 
       $or: [{ email }, { enrollmentNo }], 
       isPaid: false 
@@ -69,7 +83,7 @@ const registerStudent = async (req, res) => {
       })
     ]);
 
-    // --- STEP 5: FINAL SAVE ---
+    // --- STEP 5: FINAL DATA PERSISTENCE ---
     const hash = await bcrypt.hash(password, 10);
 
     const student = new Student({
@@ -86,17 +100,51 @@ const registerStudent = async (req, res) => {
 
     await student.save(); 
 
+    // --- STEP 6: NOTIFICATION ---
+    const currentDate = new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    const mailOptions = {
+      from: `"Placement Portal" <${process.env.EMAIL_USER}>`,
+      to: student.email,
+      subject: "Registration Successful - GGV Placement Portal",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2>Registration Confirmation</h2>
+          <p>Dear <b>${student.name}</b>,</p>
+          <p>Your registration for the <b>Placement Management System</b> has been successfully processed.</p>
+          <hr />
+          <p><b>Transaction Summary:</b></p>
+          <ul>
+            <li><b>Date:</b> ${currentDate}</li>
+            <li><b>Department:</b> ${student.department}</li>
+            <li><b>Payment ID:</b> ${student.paymentId}</li>
+          </ul>
+          <hr />
+          <p>Your account is currently <b>Pending</b> for administrative verification. You will receive an update once your profile is approved.</p>
+          <p>Best Regards,<br />Placement Cell Team</p>
+        </div>
+      `
+    };
+
+    // Global transporter handles this safely
+    transporter.sendMail(mailOptions).catch(err => console.error("Post-Registration Email Error:", err));
+
     res.status(201).json({
       success: true,
-      message: "Registration Successful! Admin verification ka intezar karein.",
+      message: "Registration Successful. Your profile is now under administrative review.",
       studentId: student._id
     });
 
   } catch (err) {
-    console.error("🔥 REGISTRATION ERROR:", err);
-    res.status(500).json({ message: "Registration fail ho gayi: " + err.message });
+    console.error("🔥 REGISTRATION CONTROLLER ERROR:", err);
+    res.status(500).json({ message: "Registration process encountered a server error: " + err.message });
   }
 };
+
 
 // ======================
 // LOGIN
@@ -118,7 +166,7 @@ const loginStudent = async (req, res) => {
    
     if (!student.isVerified) {
       return res.status(403).json({ 
-        message: "Account pending. Admin/Mentor approval ka wait karein." 
+        message: "Account pending.Wait for admin/HOD approval." 
       });
     }
 
@@ -180,7 +228,7 @@ const sendOTP = async (req, res) => {
     const { email, type } = req.body; 
 
     if (!email || !type) {
-        return res.status(400).json({ message: "Email aur Type dono bhejo bhai!" });
+        return res.status(400).json({ message: "Email and type are required" });
     }
 
     const student = await Student.findOne({ email });
@@ -188,17 +236,17 @@ const sendOTP = async (req, res) => {
     // --- CASE 1: FORGET PASSWORD ---
     if (type === "forget") {
       if (!student) {
-        return res.status(404).json({ message: "Bhai, ye email registered hi nahi hai. Pehle register karo!" });
+        return res.status(404).json({ message: "Student not found" });
       }
     }
     
     // --- CASE 2: REGISTRATION ---
     if (type === "register") {
-      // Agar banda pehle se paid member hai, toh dobara register nahi karne denge
+     
       if (student && student.isPaid) {
-        return res.status(400).json({ message: "Ye email pehle se registered aur paid hai. Direct login karo." });
+        return res.status(400).json({ message: "Student already exists" });
       }
-      // Note: Agar student exists but isPaid: false hai, toh hum OTP bhejenge (Purana kachra saaf ho jayega register API mein)
+     
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -237,7 +285,7 @@ const sendOTP = async (req, res) => {
     console.log("🔥 OTP ERROR:", err);
    
     if (err.code === 'EAUTH') {
-        return res.status(500).json({ message: "Gmail Auth Fail: App Password check karo .env mein!" });
+        return res.status(500).json({ message: "Gmail Auth Fail!" });
     }
     return res.status(500).json({ message: err.message });
   }
