@@ -83,7 +83,7 @@ body {
     border: 1px solid #ddd;
 }
 
-.dropdown:active .dropdown-content {
+.dropdown:hover .dropdown-content {
     display: block;
 }
 
