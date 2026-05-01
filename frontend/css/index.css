@@ -34,9 +34,9 @@ body {
     padding: 0 5%;
 }
 
-
-   
-
+.logo h1 {
+    font-size: 1.4rem;
+}
 
 .nav-links {
     display: flex;
@@ -122,8 +122,8 @@ body {
 
 /* --- 3. Sections Style --- */
 .photo-slider {
-    
-    height: 300px;
+    width: 100%;
+    height: 450px;
     background-color: #dcdde1;
     display: flex;
     justify-content: center;
