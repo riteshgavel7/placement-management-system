@@ -121,12 +121,15 @@ body {
 }
 
 /* --- 3. Sections Style --- */
-photo-slider {
-    width: 100%;           /* Pura screen cover karega */
-    height: 200px;         /* Desktop par standard height */
-    position: relative;
-    overflow: hidden;      /* Extra image area chhupa dega */
-    background-color: #000;/* Image load hone tak black dikhega */
+.photo-slider {
+    width: 100%;
+    height: 300px;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    color: #7f8c8d;
 }
 
 
