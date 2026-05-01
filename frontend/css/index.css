@@ -123,7 +123,7 @@ body {
 /* --- 3. Sections Style --- */
 photo-slider {
     width: 100%;           /* Pura screen cover karega */
-    height: 450px;         /* Desktop par standard height */
+    height: 200px;         /* Desktop par standard height */
     position: relative;
     overflow: hidden;      /* Extra image area chhupa dega */
     background-color: #000;/* Image load hone tak black dikhega */
