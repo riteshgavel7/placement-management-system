@@ -10,6 +10,8 @@ const companyRoutes = require("./routes/company.route");
 const aiRoutes = require("./routes/ai.route");
 const adminRoutes = require("./routes/admin.route");
 const paymentRoutes = require('./routes/payment.route');
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
 
 const app = express();
 
