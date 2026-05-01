@@ -126,7 +126,7 @@ body {
     width: 100%;           /* 110% ko 100% karein */
     max-width: 1600px;     /* Notification panel ki tarah max-width dein */
     margin: 20px auto;     /* Ise center mein karne ke liye auto margin dein */
-    height: 400px;         /* Height thodi badha sakte hain */
+    height: 300px;         /* Height thodi badha sakte hain */
     background-color: #000;
     position: relative;
     overflow: hidden;      /* Images bahar na dikhein */
