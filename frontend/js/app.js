@@ -53,14 +53,17 @@ if (getOtpBtn) {
         if (marksElem && (parseFloat(marksElem.value) > 100 || parseFloat(marksElem.value) < 0)) {
             return alert("Validation Error: Percentage must be between 0 and 100.");
         }
-        const files = document.querySelectorAll('input[type="file"]');
+       const files = document.querySelectorAll('input[type="file"]');
+
 for (let fileInput of files) {
     if (fileInput.files.length > 0) {
-        const fileSize = fileInput.files[0].size 
-        if (fileSize > 1) {
-    alert(`Validation Error: The file "${fileInput.name}" exceeds the 1MB limit. Please upload a smaller file.`); 
-    return;
-}
+        const fileSize = fileInput.files[0].size; 
+        
+        
+        if (fileSize > 1024 * 1024) { 
+            alert(`Validation Error: The file "${fileInput.name}" exceeds the 1MB limit. Please upload a smaller file.`); 
+            return;
+        }
     }
 }
 
