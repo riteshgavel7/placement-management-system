@@ -206,10 +206,9 @@ body {
         box-shadow: none;
     }
 
-    .dropdown:active .dropdown-content,
-    .dropdown:active .dropdown-content {
-        display: block;
-    }
+    dropdown.active .dropdown-content {
+    display: block;
+}
 
     .nav-links a {
         height: auto;
