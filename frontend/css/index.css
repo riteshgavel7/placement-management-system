@@ -123,14 +123,14 @@ body {
 
 /* --- 3. Sections Style --- */
 .photo-slider {
-    width: 100%;           /* 110% ko 100% karein */
-    max-width: 1600px;     /* Notification panel ki tarah max-width dein */
-    margin: 20px auto;     /* Ise center mein karne ke liye auto margin dein */
-    height: 300px;         /* Height thodi badha sakte hain */
+    width: 100%;           
+    max-width: 1600px;     
+    margin: 20px auto;     
+    height: 350px;       
     background-color: #000;
     position: relative;
-    overflow: hidden;      /* Images bahar na dikhein */
-    border-radius: 8px;    /* Corners ko panel ki tarah round karein */
+    overflow: hidden;     
+    border-radius: 8px;   
 }
 
 
