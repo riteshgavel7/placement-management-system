@@ -19,7 +19,8 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         "default-src": ["'self'"],
-        "connect-src": ["'self'", "https://placement-management-system-etjs.onrender.com", "http://localhost:3000"],
+        "img-src": ["'self'", "data:", "https://placement-management-system-etjs.onrender.com", "https://placement-management-system-tau.vercel.app"],
+        "connect-src": ["'self'", "https://placement-management-system-etjs.onrender.com"],
         "script-src": ["'self'", "'unsafe-inline'"],
         "style-src": ["'self'", "'unsafe-inline'"],
       },
