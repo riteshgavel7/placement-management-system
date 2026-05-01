@@ -1,7 +1,9 @@
+ const RENDER_URL = "https://placement-management-system-etjs.onrender.com";
+
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('mobile-menu');
     const navLinks = document.querySelector('.nav-links');
-    const RENDER_URL = "https://placement-management-system-etjs.onrender.com";
+
     
     menuToggle.addEventListener('click', () => {
         navLinks.classList.toggle('active');

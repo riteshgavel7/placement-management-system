@@ -10,6 +10,7 @@ const companyRoutes = require("./routes/company.route");
 const aiRoutes = require("./routes/ai.route");
 const adminRoutes = require("./routes/admin.route");
 const paymentRoutes = require('./routes/payment.route');
+
 const app = express();
 
 app.use(express.json());
@@ -22,17 +23,12 @@ app.use(
   })
 );
 
-/* MIDDLEWARE */
-app.use(cors({ origin: "*" }));
+app.use(cors({ 
+  origin: "https://placement-management-system-tau.vercel.app", 
+  credentials: true 
+}));
 
-
-/* FRONTEND  */
-app.use(express.static(path.join(__dirname, "../frontend")));
-
-/* UPLOADS */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-/* API ROUTES */
 
 app.use("/api/ai", aiRoutes);
 app.use("/api/students", studentRoutes);
@@ -42,12 +38,13 @@ app.use("/api/analytics", Analytics);
 app.use("/api/admin", adminRoutes);
 app.use('/api/payment', paymentRoutes);
 
-/* DEFAULT ROUTE  */
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+  res.json({ 
+    status: "success",
+    message: "Placement Management System API is live... 🚀" 
+  });
 });
 
-/* ERROR HANDLER */
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
@@ -55,6 +52,5 @@ app.use((err, req, res, next) => {
     error: err.message,
   });
 });
-
 
 module.exports = app;
