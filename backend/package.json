@@ -33,6 +33,7 @@
     "pdf-parse": "^2.4.5",
     "pdf2json": "^4.0.2",
     "razorpay": "^2.9.6",
+    "resend": "^6.12.2",
     "unpdf": "^1.4.0"
   },
   "devDependencies": {
