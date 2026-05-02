@@ -1,5 +1,5 @@
 require('dotenv').config();
-console.log("ImageKit Public Key:", process.env.IMAGEKIT_PUBLIC_KEY);
+
 
 const app = require('./src/app.js');
 const mongoose = require('mongoose');

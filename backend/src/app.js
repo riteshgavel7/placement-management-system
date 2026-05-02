@@ -18,15 +18,7 @@ const app = express();
 app.use(express.json());
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        "default-src": ["'self'"],
-        "img-src": ["'self'", "data:", "https://placement-management-system-etjs.onrender.com", "https://placement-management-system-tau.vercel.app"],
-        "connect-src": ["'self'", "https://placement-management-system-etjs.onrender.com"],
-        "script-src": ["'self'", "'unsafe-inline'"],
-        "style-src": ["'self'", "'unsafe-inline'"],
-      },
-    },
+    contentSecurityPolicy: false, 
   })
 );
 
