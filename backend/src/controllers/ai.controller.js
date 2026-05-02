@@ -1,7 +1,7 @@
 const Job = require("../models/job.model");
 const Student = require("../models/student.model");
 const axios = require("axios");
-const nodemailer = require("nodemailer");
+//const nodemailer = require("nodemailer");
 const { extractText } = require("../services/resume.service");
 const { analyzeResume } = require("../services/groq.service");
 
