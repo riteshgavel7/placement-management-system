@@ -1,16 +1,13 @@
 const Job = require("../models/job.model");
 const Student = require("../models/student.model");
 const axios = require("axios");
-//const nodemailer = require("nodemailer");
+const nodemailer = require("nodemailer");
 const { extractText } = require("../services/resume.service");
 const { analyzeResume } = require("../services/groq.service");
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-});
+const sendEmail = require("../services/resent.service");
 
 exports.aiShortlist = async (req, res) => {
   try {
@@ -112,11 +109,11 @@ exports.sendNotificationEmail = async (student, job, score, status, rejectionRea
                 </div>
             </div>`;
 
-        await transporter.sendMail({
-            to: student.email,
-            subject: isSelected ? "📢 Interview Shortlist Invitation" : "Update on your Application",
-            html: isSelected ? interviewTemplate : rejectionTemplate 
-        });
+        await sendEmail(
+  student.email,
+  isSelected ? "📢 Interview Shortlist Invitation" : "Update on your Application",
+  isSelected ? interviewTemplate : rejectionTemplate
+);
     } catch (e) {
         console.log("❌ Email Error:", e.message);
     }
