@@ -80,6 +80,7 @@ function showSection(sectionId) {
     if (sectionId === 'companySection') fetchPendingCompanies();
     if (sectionId === 'jobs') loadJobs();
     if (sectionId === 'hodSection') fetchHODs();
+    if (sectionId === 'noticesSection') fetchNotices();
 }
 
 // ================= DASHBOARD STATS =================
@@ -208,6 +209,45 @@ document.getElementById("noticeForm")?.addEventListener("submit", async (e) => {
     const data = await res.json();
     alert(data.message);
 });
+// ================= FETCH ALL NOTICES =================
+async function fetchNotices() {
+    try {
+        // Apna route check kar lena, agar backend me /api/admin/notices hai toh wo likhna
+        const res = await fetch(`${API_ADMIN}/notices`, { headers: getAdminHeaders() });
+        const notices = await res.json();
+        const tbody = document.getElementById("noticeTableBody");
+        
+        if (!tbody) return;
+        if (!notices || notices.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5'>No active notices found.</td></tr>";
+            return;
+        }
+
+        tbody.innerHTML = notices.map(n => `
+            <tr>
+                <td><b>${n.title}</b></td>
+                <td>${n.Description || "General"}</td>
+                <td>${new Date(n.createdAt).toLocaleDateString()}</td>
+                <td>${n.pdfPath ? `<a href="http://localhost:3000${n.pdfPath}" target="_blank" style="color: #3498db;">📄 View PDF</a>` : "No PDF"}</td>
+                <td><button onclick="deleteNotice('${n._id}')" style="background:#e74c3c; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">🗑️ Delete</button></td>
+            </tr>
+        `).join('');
+    } catch (err) { console.error("Notice Fetch Error:", err); }
+}
+
+// ================= DELETE NOTICE =================
+window.deleteNotice = async (id) => {
+    if (!confirm("Are you sure you want to delete this notice?")) return;
+    try {
+        const res = await fetch(`${API_ADMIN}/delete-notice/${id}`, {
+            method: "DELETE",
+            headers: getAdminHeaders()
+        });
+        const data = await res.json();
+        alert(data.message);
+        if (res.ok) fetchNotices(); // Delete hone ke baad table refresh karein
+    } catch (err) { alert("Error deleting notice."); }
+};
 
 // ================= FETCH JOBS =================
 async function loadJobs() {
@@ -287,7 +327,104 @@ async function fetchHODs() {
         `).join('');
     } catch (err) { console.error(err); }
 }
+// ================== 1. HOD FORM SHOW/HIDE ==================
+window.toggleHodForm = () => {
+    const box = document.getElementById("addHodFormBox");
+    if (box) {
+        box.style.display = box.style.display === "none" ? "block" : "none";
+    }
+};
 
+// ================== 2. CREATE NEW HOD ==================
+document.getElementById("createHodForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    // Form se data nikalna
+    const newHodData = {
+        name: document.getElementById("hodName").value,
+        email: document.getElementById("hodEmail").value,
+        password: document.getElementById("hodPassword").value,
+        department: document.getElementById("hodDept").value
+    };
+
+    try {
+        const res = await fetch(`${API_ADMIN}/create-hod`, {
+            method: "POST",
+            headers: getAdminHeaders(),
+            body: JSON.stringify(newHodData)
+        });
+        const data = await res.json();
+        
+        alert(data.message || "HOD Created successfully!");
+        
+        if (res.ok) {
+            document.getElementById("createHodForm").reset(); // Form clear karna
+            toggleHodForm(); // Form hide karna
+            fetchHODs(); // Table ko turant refresh karna
+        }
+    } catch (err) { 
+        console.error("HOD Create Error:", err);
+        alert("Error creating HOD"); 
+    }
+});
+
+// ================== 3. DELETE HOD ==================
+window.deleteHOD = async (id) => {
+    if (!confirm("Are you sure you want to permanently delete this HOD account?")) return;
+    
+    try {
+        const res = await fetch(`${API_ADMIN}/delete-hod/${id}`, {
+            method: "DELETE",
+            headers: getAdminHeaders()
+        });
+        const data = await res.json();
+        alert(data.message || "HOD deleted!");
+        
+        if (res.ok) fetchHODs(); // Delete hone ke baad list refresh karna
+    } catch (err) { 
+        console.error("HOD Delete Error:", err);
+        alert("Error deleting HOD"); 
+    }
+};
+
+// ================== 4. EDIT (UPDATE) HOD ==================
+window.editHOD = async (id, oldName, oldDept, oldEmail) => {
+    // Admin se screen par naya data mangna (purana data pehle se bhara aayega)
+    const newName = prompt("Update HOD Name:", oldName);
+    if (newName === null) return; // Cancel dabane par ruk jayega
+
+    const newDept = prompt("Update Department (e.g., CSIT, Mechanical, Civil, Commerce):", oldDept);
+    if (newDept === null) return;
+
+    const newPassword = prompt("Set New Password (leave blank if you don't want to change it):", "");
+
+    // Data prepare karna
+    const updateData = { 
+        name: newName, 
+        department: newDept 
+    };
+    
+    // Agar password change kiya hai, tabhi bhejo
+    if (newPassword && newPassword.trim() !== "") {
+        updateData.password = newPassword;
+    }
+
+    try {
+        const res = await fetch(`${API_ADMIN}/update-hod/${id}`, {
+            method: "PATCH", // Backend ke hisaab se PATCH request
+            headers: getAdminHeaders(),
+            body: JSON.stringify(updateData)
+        });
+        
+        const data = await res.json();
+        alert(data.message || "HOD details updated!");
+        
+        if (res.ok) fetchHODs(); // Table refresh karna
+    } catch (err) { 
+        console.error("HOD Update Error:", err);
+        alert("Failed to update HOD details."); 
+    }
+};
 // ================== STUDENT MANAGEMENT (UPDATE SECTION) ==================
 async function fetchAdminStudents() {
     try {

@@ -176,8 +176,14 @@ const approveStudent = async (req, res) => {
 
 const getPendingCompanies = async (req, res) => {
     try {
-        // Ab Node ko pata hai ki 'Company' kya hai
-        const companies = await Company.find({ isVerified: false });
+        const companies = await Company.find({ 
+            isVerified: false, 
+            $or: [
+                { status: { $ne: 'rejected' } },
+                { status: { $exists: false } }
+            ]
+        }).sort({ createdAt: -1 });
+
         res.json(companies);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -189,15 +195,28 @@ const approveCompany = async (req, res) => {
         const { id } = req.params;
         const { action } = req.body; 
 
-        const isVerified = action === 'approve';
-        
-        const company = await Company.findByIdAndUpdate(
-            id, 
-            { isVerified }, 
-            { returnDocument: 'after' } 
-        );
+        if (action === 'reject') {
+            const updatedCompany = await Company.findByIdAndUpdate(
+                id, 
+                { isVerified: false, status: 'rejected' }, 
+                { returnDocument: 'after', runValidators: true } 
+            );
+            if (!updatedCompany) return res.status(404).json({ message: "Company not found!" });
+            return res.json({ message: "Company Rejected and Blocked successfully! ❌" });
+        }
 
-        res.json({ message: `Company ${isVerified ? 'Approved' : 'Rejected'}!` });
+        if (action === 'approve') {
+            const updatedCompany = await Company.findByIdAndUpdate(
+                id, 
+                { isVerified: true, status: 'approved' }, 
+                { returnDocument: 'after', runValidators: true }
+            );
+            if (!updatedCompany) return res.status(404).json({ message: "Company not found!" });
+            return res.json({ message: "Company Approved successfully! ✅" });
+        }
+
+        return res.status(400).json({ message: "Invalid action!" });
+
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

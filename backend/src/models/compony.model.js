@@ -23,11 +23,17 @@ const companySchema = new mongoose.Schema(
       type: String,
       default: "company",
     },
+    status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'], 
+    default: 'pending',
+},
 
     isVerified: {
       type: Boolean,
       default: false,
     },
+  
   },
   { timestamps: true }
 );

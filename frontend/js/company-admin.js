@@ -1,35 +1,21 @@
-const RENDER_URL = "http://localhost:3000";
-const API_ADMIN = `${RENDER_URL}/api/admin`;
-
-
-window.fetchPendingCompanies = async function() {
-    console.log("Company fetcher started...");
-    const token = localStorage.getItem("adminToken");
-    const tbody = document.getElementById("companyTableBody");
-
-    try {
-        const res = await fetch(`${API_ADMIN}/pending-companies`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-        const companies = await res.json();// 1. Base URL for Render
-const RENDER_URL = "https://placement-management-system-etjs.onrender.com";
-const API_ADMIN = `${RENDER_URL}/api/admin`;
+const BASE_URL = "http://localhost:3000";
+const API_ADMIN = `${BASE_URL}/api/admin`;
 
 window.fetchPendingCompanies = async function() {
     console.log("Company fetcher started...");
-    const token = localStorage.getItem("adminToken"); // Admin token check
+    const token = localStorage.getItem("adminToken"); 
     const tbody = document.getElementById("companyTableBody");
 
+    if (!tbody) return;
+
     try {
-        // Fix: API_ADMIN variable use kiya (Render URL ke saath)
         const res = await fetch(`${API_ADMIN}/pending-companies`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
         const companies = await res.json();
 
-        if (!tbody) return;
         if (!companies || companies.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='5' align='center'>No pending company registration requests found..</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='5' align='center'>No pending company registration requests found.</td></tr>";
             return;
         }
 
@@ -46,80 +32,36 @@ window.fetchPendingCompanies = async function() {
             </tr>`).join('');
     } catch (err) { 
         console.error("Fetch Error:", err); 
-        if(tbody) tbody.innerHTML = "<tr><td colspan='5' align='center' style='color:red;'>Failed to load data.</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='5' align='center' style='color:red;'>Failed to load data.</td></tr>";
     }
 };
 
-// 2. Approve ya Reject logic
 window.updateCompanyStatus = async function(id, action) {
-    if (!confirm(`Are you sure you want to ${action} this company?`)) return;
+    const displayAction = action === 'approve' ? 'Approve' : 'Reject';
+    
+    if (!confirm(`Are you sure you want to ${displayAction} this company?`)) return;
 
     const token = localStorage.getItem("adminToken");
+    
     try {
-        // Fix: API_ADMIN variable ka use (Consistently)
         const res = await fetch(`${API_ADMIN}/approve-company/${id}`, {
             method: "PATCH",
             headers: { 
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             },
-            body: JSON.stringify({ action })
+            body: JSON.stringify({ action: action.toLowerCase() })
         });
 
         if (res.ok) {
-            alert(`Company ${action}ed successfully! ✅`);
-            fetchPendingCompanies(); // Refresh table
+            alert(`Company ${displayAction}d successfully! ✅`);
+            fetchPendingCompanies(); 
         } else {
             const errorData = await res.json();
             alert(errorData.message || "Operation failed. Unable to update company status.");
         }
     } catch (err) {
+        console.error("Update Error:", err);
         alert("Internal Server Error. Please contact the technical support team.");
     }
-}
-
-        if (!tbody) return;
-        if (companies.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='5' align='center'>No pending company registration requests found..</td></tr>";
-            return;
-        }
-
-        tbody.innerHTML = companies.map(c => `
-            <tr>
-                <td><b>${c.companyName}</b></td>
-                <td>${c.email}</td>
-                <td>${c.location}</td>
-                <td><a href="${c.website}" target="_blank">Visit</a></td>
-                <td>
-                    <button class="btn-approve" onclick="updateCompanyStatus('${c._id}', 'approve')">Approve</button>
-                    <button class="btn-reject" onclick="updateCompanyStatus('${c._id}', 'reject')">Reject</button>
-                </td>
-            </tr>`).join('');
-    } catch (err) { console.error(err); }
 };
-
-// 2. Approve ya Reject logic
-window.updateCompanyStatus = async function(id, action) {
-    if (!confirm(`Are you sure you want to ${action}?`)) return;
-
-    const token = localStorage.getItem("adminToken");
-    try {
-        const res = await fetch(`${API_ADMIN_COMP}/approve-company/${id}`, {
-            method: "PATCH",
-            headers: { 
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ action })
-        });
-
-        if (res.ok) {
-            alert(`Company ${action}ed successfully!`);
-            fetchPendingCompanies(); // Refresh table
-        } else {
-            alert("Operation failed. Unable to update company status.");
-        }
-    } catch (err) {
-        alert("Internal Server Error. Please contact the technical support team.");
-    }
-}
