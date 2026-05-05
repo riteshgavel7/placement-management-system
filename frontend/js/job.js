@@ -1,4 +1,4 @@
-const BASE_URL = "https://placement-management-system-etjs.onrender.com";
+const BASE_URL = "http://localhost:3000";
 const API_JOB = `${BASE_URL}/api/jobs/all`;
 const API_APPLY = `${BASE_URL}/api/jobs/apply`;
 

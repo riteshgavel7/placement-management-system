@@ -7,13 +7,12 @@ const mongoose = require('mongoose'); // Validation ke liye
 const createOrder = async (req, res) => {
     try {
         const { email, enrollmentNo, rollNo } = req.body;
-        const amount = 0; // Production mein ise env ya config se lo
+        const amount = 50; 
 
-        // Duplicate check (Strict)
         const existingStudent = await Student.findOne({ 
             $or: [
-                { email: email.trim().toLowerCase() }, 
-                { enrollmentNo: enrollmentNo.trim().toUpperCase() }, 
+                { email: email?.trim().toLowerCase() }, 
+                { enrollmentNo: enrollmentNo?.trim().toUpperCase() }, 
                 { rollNo: rollNo }
             ],
             isPaid: true 
@@ -21,21 +20,28 @@ const createOrder = async (req, res) => {
         
         if (existingStudent) return res.status(400).json({ message: "Student already exists" });
 
-        // Razorpay Order
+        if (amount === 0) {
+            return res.status(200).json({ 
+                isFree: true, 
+                amount: 0, 
+                id: `free_${Date.now()}`,
+                message: "Free registration" 
+            });
+        }
+
         const order = await razorpay.orders.create({
             amount: amount * 100, 
             currency: "INR",
             receipt: `rcpt_${Date.now()}`
-        });
+        }); 
 
         res.status(200).json({ ...order, isFree: false });
 
     } catch (err) {
         console.error("Order Error:", err);
-        res.status(500).json({ message: "Payment error occurred." });
+        res.status(500).json({ message: "Payment initialization failed." });
     }
 };
-
 // 2. Verify & Update DB
 const verifyPayment = async (req, res) => {
     try {

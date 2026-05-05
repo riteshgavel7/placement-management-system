@@ -225,42 +225,40 @@ const getProfile = async (req, res) => {
 
 const sendOTP = async (req, res) => {
   try {
-    const { email, type } = req.body; 
+    const { email, type } = req.body;
 
     if (!email || !type) {
-        return res.status(400).json({ message: "Email and type are required" });
+      return res.status(400).json({ message: "Email and type are required" });
     }
 
     const student = await Student.findOne({ email });
 
-    // --- CASE 1: FORGET PASSWORD ---
     if (type === "forget") {
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
       }
     }
-    
-    // --- CASE 2: REGISTRATION ---
+
     if (type === "register") {
-     
       if (student && student.isPaid) {
         return res.status(400).json({ message: "Student already exists" });
       }
-     
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
- if (type === "forget" && student) {
-  student.otp = otp;
-  student.otpExpire = Date.now() + 5 * 60 * 1000; 
-  await student.save();
-}
-    // NODEMAILER SETUP
+    const otpExpire = Date.now() + 5 * 60 * 1000;
+
+    await Student.findOneAndUpdate(
+      { email: email },
+      { otp, otpExpire },
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
+    );
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS // 
+        pass: process.env.EMAIL_PASS
       }
     });
 
@@ -278,14 +276,12 @@ const sendOTP = async (req, res) => {
       `
     });
 
-   
-    res.json({ message: "OTP sent to email"}); 
+    res.json({ message: "OTP sent to email",tempOtp: otp });
 
   } catch (err) {
     console.log("🔥 OTP ERROR:", err);
-   
     if (err.code === 'EAUTH') {
-        return res.status(500).json({ message: "Gmail Auth Fail!" });
+      return res.status(500).json({ message: "Gmail Auth Fail!" });
     }
     return res.status(500).json({ message: err.message });
   }

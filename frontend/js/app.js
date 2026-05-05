@@ -5,7 +5,7 @@ const otpSection = document.getElementById("otpSection");
 
 let serverOtp = "";
 
-const RENDER_URL = "https://placement-management-system-etjs.onrender.com";
+const RENDER_URL = "http://localhost:3000";
 const API_BASE = `${RENDER_URL}/api/students`;
 
 // ================= LOGIN SECTION =================
@@ -163,7 +163,7 @@ async function handleFinalRegistration(response) {
         if (finalRes.ok) {
             alert("Registration successful! Your digital receipt is being generated.");
             generateReceipt(formData, response ? response.razorpay_payment_id : "FREE_REGISTRATION");
-            setTimeout(() => window.location.href = "index.html", 3000);
+            setTimeout(() => window.location.href = "home.html", 3000);
         } else {
             const finalData = await finalRes.json();
             alert("Registration Error: " + finalData.message);

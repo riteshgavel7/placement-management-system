@@ -10,10 +10,10 @@ const companyRoutes = require("./routes/company.route");
 const aiRoutes = require("./routes/ai.route");
 const adminRoutes = require("./routes/admin.route");
 const paymentRoutes = require('./routes/payment.route');
-const dns = require('dns');
-dns.setDefaultResultOrder('ipv4first');
 
 const app = express();
+app.use(cors());
+
 
 app.use(express.json());
 app.use(
@@ -29,10 +29,7 @@ app.use(
   })
 );
 
-app.use(cors({ 
-  origin: "https://placement-management-system-tau.vercel.app", 
-  credentials: true 
-}));
+
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 

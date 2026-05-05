@@ -1,5 +1,5 @@
 const adminLoginForm = document.getElementById("adminLoginForm");
-const BASE_URL = "https://placement-management-system-etjs.onrender.com";
+const BASE_URL = "http://localhost:3000";
 const API_ADMIN = `${BASE_URL}/api/admin`;
 const API_BASE = `${BASE_URL}/api`;
 const API_URL = `${BASE_URL}/api/admin`;
@@ -234,13 +234,22 @@ async function loadJobs() {
 
 window.runAIScan = async (jobId) => {
     if (!confirm("Admin: Start AI Scan?")) return;
-    const res = await fetch(`${API_BASE}/ai/bulk/${jobId}`, { method: "POST", headers: getAdminHeaders() });
-    const data = await res.json();
-    alert(data.success ? `Processed: ${data.totalProcessed}` : data.message);
-};
+    
+    const loader = document.getElementById("aiLoader");
+    if (loader) loader.style.display = "flex"; // Loader ON (Screen Lock)
 
-window.viewApplicants = (jobId) => { localStorage.setItem("selectedJobId", jobId); localStorage.setItem("source", "admin"); window.location.href = "applicants.html"; };
-window.openAnalysis = (jobId) => { localStorage.setItem("selectedJobId", jobId); window.location.href = "analysis.html"; };
+    try {
+        const res = await fetch(`${API_BASE}/ai/bulk/${jobId}`, { method: "POST", headers: getAdminHeaders() });
+        const data = await res.json();
+        
+        if (loader) loader.style.display = "none"; // Loader OFF
+        alert(data.success ? `Processed: ${data.totalProcessed}` : data.message);
+        window.location.reload();
+    } catch (err) {
+        if (loader) loader.style.display = "none"; // Error aaye toh bhi Loader OFF
+        alert("Something went wrong during AI screening.");
+    }
+};
 
 // ================== EXPORT ==================
 async function exportData() {

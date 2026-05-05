@@ -1,4 +1,4 @@
-const BASE_URL = "https://placement-management-system-etjs.onrender.com";
+const BASE_URL = "http://localhost:3000";
 const API_URL = `${BASE_URL}/api/admin`;
 const API_JOB = `${BASE_URL}/api/jobs/all`;
 
@@ -9,7 +9,7 @@ let currentStudentId = null;
 // Auth Check
 if (!token || localStorage.getItem('role') !== 'HOD') {
     window.location.href = "HOD-login.html";
-}
+} 
 
 // 1. Fetch Students
 async function fetchStudents() {

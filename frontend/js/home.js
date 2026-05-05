@@ -1,4 +1,4 @@
- const RENDER_URL = "https://placement-management-system-etjs.onrender.com";
+ const RENDER_URL = "http://localhost:3000";
 
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('mobile-menu');

@@ -82,7 +82,7 @@ const addNotice = (req, res) => {
             });
 
             await newNotice.save();
-            res.status(201).json({ message: "Notice posted successfully with PDF!" });
+            res.status(201).json({ message: "Notice posted successfully " });
         } catch (err) {
             res.status(500).json({ message: err.message });
         }

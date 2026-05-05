@@ -1,4 +1,4 @@
-const RENDER_URL = "https://placement-management-system-etjs.onrender.com";
+const RENDER_URL = "http://localhost:3000";
 const API_ADMIN = `${RENDER_URL}/api/admin`;
 
 

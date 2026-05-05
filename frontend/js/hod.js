@@ -5,7 +5,7 @@ document.getElementById('hodLoginForm').addEventListener('submit', async (e) => 
     const email = document.getElementById('hodEmail').value;
     const password = document.getElementById('hodPassword').value;
 
-    const BASE_URL = "https://placement-management-system-etjs.onrender.com";
+    const BASE_URL = "http://localhost:3000";
 
     loginBtn.innerText = "Authenticating...";
     loginBtn.disabled = true;
