@@ -1,57 +1,100 @@
 const Groq = require("groq-sdk");
-require('dotenv').config(); 
+require("dotenv").config();
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 exports.analyzeResume = async (resumeText, job, studentProfile = {}) => {
   try {
     if (!resumeText || resumeText.trim().length < 10) {
-        return { score: 0, decision: "reject", reason: "Resume text missing or unreadable." };
+      return {
+        score: 0,
+        decision: "reject",
+        reason: "Resume text missing or unreadable."
+      };
     }
 
-    
     const prompt = `
-  [STRICT TECHNICAL AUDIT MODE - NO ASSUMPTIONS ALLOWED]
-  
-  CANDIDATE: ${studentProfile.name}
-  TARGET JOB: ${job.title}
-  JD REQUIREMENTS: ${job.description}
-  RESUME TEXT: "${resumeText.slice(0, 6000)}"
+You are a fair and balanced ATS (Applicant Tracking System) used for ALL college departments including Computer Science, Mechanical, Civil, Electrical, Commerce, Arts, etc.
 
-  [MANDATORY EVALUATION STEPS]
-  STEP 1: Identify the primary tech stack in the JD.
-  STEP 2: Scan the RESUME TEXT for EXACT matches. If a skill is not found, its score is 0.
-  STEP 3: Check PROJECTS. If they are non-technical (e.g., Event Management), they get 0 points for a ${job.title} role.
-  STEP 4: Verify CGPA. If CGPA is < 6.0, penalize heavily.
+You MUST evaluate candidates based on relevance to the JOB DESCRIPTION, not only technical stack.
 
-  [SCORING BREAKDOWN - TOTAL 100]
-  1. ACADEMICS (20 pts): 
-     - Score based ONLY on provided CGPA: 9.0+ (15), 8.0-8.9 (13), 7.0-7.9 (11), <7.0 (8). 
-     - Fundamental subjects (DSA, OS, DBMS) match: +5 pts.
-  2. DOMAIN SKILLS (35 pts): 
-     - Direct technical match (JavaScript, Node.js, etc.): 25 pts. 
-     - Tooling (Git, SQL): 10 pts.
-     - IF CORE TECH IS MISSING: SCORE IS 0.
-  3. TECHNICAL PROJECTS (25 pts): 
-     - ONLY Technical/Coding projects count. Event/Volunteering = 0 pts.
-  4. LEADERSHIP & GRACE (20 pts): 
-     - College grace (10) + Soft skills/Leadership (10).
+You MUST return ONLY valid JSON output.
 
-  [THE "BRUTAL" REJECTION RULE]
-  - If the candidate does not have the technical skills required for ${job.title}, they MUST be rejected, regardless of their soft skills or CGPA.
-  - DO NOT mention names or data from other candidates. 
+---
 
-  [OUTPUT FORMAT - JSON ONLY]
-  {
-    "score": number,
-    "decision": "select" (if score >= 70) or "reject" (if score < 70),
-    "reason": "A 4-5 sentence technical audit. Must mention: 'Missing: [skills]', 'Academic Score: [score]', and 'Project Feedback: [feedback]'. Be direct and harsh if the candidate is not a fit."
-  }
+RULES:
+
+1. Do NOT assume missing skills automatically means rejection.
+2. Evaluate based on relevance to the job role.
+3. Give partial credit for transferable skills.
+4. Consider all departments fairly.
+
+---
+
+EVALUATION STRUCTURE (100 points):
+
+1. RELEVANT SKILLS (40 pts)
+- Match skills from resume with job description
+- Give partial credit for related skills
+- CS roles → programming skills
+- Non-CS roles → communication, analysis, tools, domain knowledge
+
+2. PROJECTS / EXPERIENCE (25 pts)
+- Technical or non-technical both count if relevant
+- Internships, college projects, leadership roles included
+
+3. ACADEMICS (20 pts)
+- 90%+ = 20
+- 80–89% = 17
+- 70–79% = 14
+- 60–69% = 11
+- below 60% = 8
+
+4. SOFT SKILLS (15 pts)
+- Communication
+- Leadership
+- Teamwork
+- Problem solving
+
+---
+
+DECISION RULE:
+- score >= 70 → SELECT
+- 50–69 → AVERAGE / REVIEW
+- below 50 → REJECT
+
+---
+
+INPUT:
+
+Resume:
+${resumeText.slice(0, 6000)}
+ 
+Job:
+${job.description || job.title}
+
+---
+
+OUTPUT FORMAT (JSON ONLY):
+
+{
+  "score": number,
+  "decision": "SELECT" or "AVERAGE" or "REJECT",
+  "reason": "short fair explanation mentioning strengths and improvements"
+}
 `;
+
     const chatCompletion = await groq.chat.completions.create({
       messages: [
-        { role: "system", content: "You are a highly analytical ATS system that provides varied scores based on merit. No generic scoring." },
-        { role: "user", content: prompt }
+        {
+          role: "system",
+          content:
+            "You are an ATS JSON evaluator system. Always respond in JSON format only."
+        },
+        {
+          role: "user",
+          content: prompt + "\n\nReturn JSON output only."
+        }
       ],
       model: "llama-3.3-70b-versatile",
       response_format: { type: "json_object" },
@@ -60,25 +103,28 @@ exports.analyzeResume = async (resumeText, job, studentProfile = {}) => {
 
     let result = JSON.parse(chatCompletion.choices[0].message.content);
 
-    // LOGIC UPDATE: Jinka 65 ya upar hai, wo Select honge
     const safeScore = Number(result.score) || 0;
-    const safeDecision = safeScore >= 65 ? "SELECT" : "REJECT"; 
-    const safeReason = result.reason || `Analysis complete with score ${safeScore}.`;
+    const safeDecision = safeScore >= 65 ? "SELECT" : "REJECT";
+    const safeReason =
+      result.reason || `Analysis complete with score ${safeScore}.`;
 
     console.log(`\n--------------------------------------------`);
     console.log(`🎯 CANDIDATE: ${studentProfile.name}`);
     console.log(`🔢 ATS SCORE: ${safeScore}/100 | [${safeDecision}]`);
     console.log(`📝 FEEDBACK: ${safeReason}`);
     console.log(`--------------------------------------------\n`);
-    
-    return {
-        score: safeScore,
-        decision: safeDecision.toLowerCase(),
-        reason: safeReason
-    };
 
+    return {
+      score: safeScore,
+      decision: safeDecision.toLowerCase(),
+      reason: safeReason
+    };
   } catch (error) {
     console.error("❌ AI Error:", error.message);
-    return { score: 0, decision: "reject", reason: "Process failed." };
+    return {
+      score: 0,
+      decision: "reject",
+      reason: "Process failed."
+    };
   }
 };

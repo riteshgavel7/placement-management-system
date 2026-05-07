@@ -1,6 +1,5 @@
 const nodemailer = require("nodemailer");
 
-
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587, // Changed from 25 to 587 (Standard for TLS)

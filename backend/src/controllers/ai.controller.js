@@ -3,7 +3,7 @@ const Student = require("../models/student.model");
 const axios = require("axios");
 const nodemailer = require("nodemailer");
 const { extractText } = require("../services/resume.service");
-const { analyzeResume } = require("../services/Ollama.service");
+const { analyzeResume } = require("../services/groq.service");
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 

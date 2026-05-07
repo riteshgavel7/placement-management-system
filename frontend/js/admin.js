@@ -358,9 +358,8 @@ document.getElementById("createHodForm")?.addEventListener("submit", async (e) =
         alert(data.message || "HOD Created successfully!");
         
         if (res.ok) {
-            document.getElementById("createHodForm").reset(); // Form clear karna
-            toggleHodForm(); // Form hide karna
-            fetchHODs(); // Table ko turant refresh karna
+            document.getElementById("createHodForm").reset(); 
+            fetchHODs(); 
         }
     } catch (err) { 
         console.error("HOD Create Error:", err);
@@ -455,37 +454,40 @@ window.loadAdminModal = async function(id) {
         const res = await fetch(`${API_URL}/student-detail/${id}`, { headers: getAdminHeaders() });
         let response = await res.json();
         
-        // Exact Postman response extraction
+        // Data extraction logic
         let s = response.data ? response.data : (Array.isArray(response) ? response.find(st => st._id === id) : response);
 
-        if (!s) return alert("Record not found. The requested student data is unavailable.");
+        if (!s) return alert("Record not found.");
 
-        // Bulletproof safeSet (Fixes the issue with 0 or floating point numbers getting erased)
         const safeSet = (elementId, value) => {
             const el = document.getElementById(elementId);
-            if (el) {
-                el.value = (value !== undefined && value !== null) ? value : "";
-            }
+            if (el) el.value = (value !== undefined && value !== null) ? value : "";
         };
 
-        // --- 1-to-1 Mapping from Postman to Screen ---
+        // --- Basic Fields Mapping ---
         safeSet('editName', s.name);
         safeSet('editEmail', s.email);
         safeSet('editMobile', s.mobile);
         safeSet('editRoll', s.rollNo);
         safeSet('editEnroll', s.enrollmentNo);
-        safeSet('editDept', s.department || "N/A");
+        safeSet('editDept', s.department);
         safeSet('editCourse', s.course);
         safeSet('editBatch', s.batch);
         safeSet('editMarks', s.twelfthMarks);
+        safeSet('editGender', s.gender);
+        safeSet('editDept', s.department);
         safeSet('editPassingYear', s.twelfthPassingYear);
-        safeSet('editGender', s.gender || "Male");
-        safeSet('editStatus', s.status ? s.status.toUpperCase() : "PENDING");
+        safeSet('editPaymentId', s.paymentId || "N/A");
+        safeSet('editPassingYear', s.twelfthPassingYear);
+        safeSet('editGender', s.gender);
+        safeSet('editHodCount', s.hodEditCount);
+        safeSet('editStatus', (s.status || 'PENDING').toUpperCase());
         
-        // NAYA: HOD Edit Count map kiya
-        safeSet('editHodCount', s.hodEditCount !== undefined ? s.hodEditCount : "0");
-        
-        // --- Status Mapping with Colors ---
+        // Email Verification Dropdown
+        const emailVerEl = document.getElementById('editIsVerified');
+        if (emailVerEl) emailVerEl.value = s.isVerified ? "true" : "false";
+
+        // Payment & Admin Approval Visuals
         const payEl = document.getElementById('editPaymentStatus');
         if (payEl) {
             payEl.value = s.isPaid ? "PAID ✅" : "UNPAID ❌";
@@ -498,92 +500,102 @@ window.loadAdminModal = async function(id) {
             appEl.style.color = s.isAdminApproved ? "#27ae60" : "#e74c3c";
         }
 
-        // NAYA: Email Verified Status map kiya
-        const emailVerEl = document.getElementById('editIsVerified');
-        if (emailVerEl) {
-            emailVerEl.value = s.isVerified ? "VERIFIED ✅" : "NOT VERIFIED ❌";
-            emailVerEl.style.color = s.isVerified ? "#27ae60" : "#e74c3c";
-        }
-
-        // --- Documents (Photo button hide logic fixed) ---
+        // --- File View Buttons (Sahi Link mapping) ---
         const vResume = document.getElementById('viewResumeBtn');
         const vPic = document.getElementById('viewPicBtn');
         
         if (vResume) {
-            if (typeof s.resume === 'string' && s.resume.startsWith("http")) {
+            if (s.resume && s.resume.includes("http")) {
                 vResume.href = s.resume;
                 vResume.style.display = 'inline-block';
+                vResume.innerHTML = "📄 View Resume";
             } else {
                 vResume.style.display = 'none';
             }
         }
 
         if (vPic) {
-            if (typeof s.profilePicture === 'string' && s.profilePicture.startsWith("http")) {
+            if (s.profilePicture && s.profilePicture.includes("http")) {
                 vPic.href = s.profilePicture;
                 vPic.style.display = 'inline-block';
+                vPic.innerHTML = "🖼️ View Photo";
             } else {
-                vPic.style.display = 'none'; // Photo na hone par button gayab
+                vPic.style.display = 'none'; 
             }
         }
 
         document.getElementById('editModal').style.display = 'block';
     } catch (err) { 
-        console.error("Load Error Details:", err);
-       alert("Synchronisation error. Unable to retrieve record details.");
+       console.error("Load Error:", err);
+       alert("Error loading student details.");
     }
 }
 
+window.closeModal = function() {
+    document.getElementById('editModal').style.display = 'none';
+    // Files clear karein taaki next time blank dikhe
+    document.getElementById('updatePicInput').value = "";
+    document.getElementById('updateResumeInput').value = "";
+};
+
+// 2. Save Logic Fix
 window.saveAdminEdit = async function() {
     const action = document.getElementById('adminAction').value;
-    const updateData = {
-        name: document.getElementById('editName').value,
-        mobile: document.getElementById('editMobile').value,
-        rollNo: document.getElementById('editRoll').value,
-        enrollmentNo: document.getElementById('editEnroll').value,
-        course: document.getElementById('editCourse').value,
-        batch: document.getElementById('editBatch').value,
-        twelfthMarks: document.getElementById('editMarks').value,
-        twelfthPassingYear: document.getElementById('editPassingYear').value,
-        gender: document.getElementById('editGender').value,
-        hodEditCount: parseInt(document.getElementById('editHodCount').value) || 0
-    };
+    const formData = new FormData();
+    
+    // --- Existing Fields ---
+    formData.append('name', document.getElementById('editName').value);
+    formData.append('mobile', document.getElementById('editMobile').value);
+    formData.append('rollNo', document.getElementById('editRoll').value);
+    formData.append('enrollmentNo', document.getElementById('editEnroll').value);
+    formData.append('course', document.getElementById('editCourse').value);
+    formData.append('batch', document.getElementById('editBatch').value);
+    formData.append('twelfthMarks', document.getElementById('editMarks').value);
+    formData.append('hodEditCount', parseInt(document.getElementById('editHodCount').value) || 0);
+    formData.append('isVerified', document.getElementById('editIsVerified').value === 'true');
 
-    if (action === 'approve') updateData.status = 'verified';
-    else if (action === 'reject') updateData.status = 'rejected';
+    // --- 🚀 NAYE FIELDS (Jo screenshot mein hain par yahan nahi the) ---
+    formData.append('department', document.getElementById('editDept').value); 
+    formData.append('twelfthPassingYear', document.getElementById('editPassingYear').value);
+    formData.append('gender', document.getElementById('editGender').value);
+
+    // --- Status Logic ---
+    // Agar Admin 'Approve' select karta hai toh status 'verified' hoga aur isAdminApproved true
+    if (action === 'approve') {
+        formData.append('status', 'verified');
+        formData.append('isAdminApproved', true);
+    } else if (action === 'reject') {
+        formData.append('status', 'rejected');
+        formData.append('isAdminApproved', false);
+    }
+
+    // --- Files Handling ---
+    const picFile = document.getElementById('updatePicInput').files[0];
+    const resumeFile = document.getElementById('updateResumeInput').files[0];
+    if (picFile) formData.append('profilePicture', picFile);
+    if (resumeFile) formData.append('resume', resumeFile);
 
     try {
+        const headers = getAdminHeaders();
+        // Multipart data ke liye Content-Type delete karna compulsory hai
+        delete headers['Content-Type'];
+
         const res = await fetch(`${API_URL}/update-details/${currentStudentId}`, {
             method: "PATCH",
-            headers: getAdminHeaders(),
-            body: JSON.stringify(updateData)
+            headers: headers,
+            body: formData 
         });
+
+        const data = await res.json();
         if (res.ok) { 
-            alert("Updated successfully! ✅"); 
-            document.getElementById('editModal').style.display = 'none'; 
-            fetchAdminStudents(); 
+            alert("Record Updated Successfully! ✅"); 
+            closeModal();
+            fetchAdminStudents(); // Table refresh karein
         } else { 
-            const d = await res.json(); 
-            alert("Error: " + d.message); 
+            alert("Error: " + data.message); 
         }
-    } catch (err) { alert("Network error. Unable to communicate with the server."); }
-}
-
-function filterUpdateTable() {
-    const filter = document.getElementById("adminStudentSearch").value.toLowerCase();
-    const rows = document.querySelectorAll("#adminUpdateTableBody tr");
-
-    rows.forEach(row => {
-        // textContent hidden data (Enrollment/Email) ko bhi read kar leta hai
-        const text = row.textContent.toLowerCase(); 
-        row.style.display = text.includes(filter) ? "" : "none";
-    });
-}
-
-window.closeModal = () => { document.getElementById('editModal').style.display = 'none'; };
-function logout() { 
-    if (confirm("Are you sure you want to terminate the current session?")) { 
-        localStorage.clear(); 
-        window.location.replace("admin-login.html"); // Updated here
-    } 
-}
+    } catch (err) { 
+        console.error("Critical Error:", err);
+        alert("Failed to communicate with server."); 
+    }
+};

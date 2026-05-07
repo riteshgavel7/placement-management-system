@@ -77,57 +77,81 @@ window.loadAndOpenModal = async function(id) {
         const res = await fetch(`${API_URL}/student-detail/${id}`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
-        let s = await res.json();
         
-        // Handling Array response from Backend
-        if (Array.isArray(s)) {
-            s = s.find(student => student._id === id) || s[0];
+        if (!res.ok) throw new Error("Student details not found");
+        
+        const response = await res.json();
+        
+        // 🚀 CRITICAL FIX: Backend response handle karna
+        // Agar response { success: true, data: {...} } hai ya direct student object hai
+        let s = response.data ? response.data : (Array.isArray(response) ? response[0] : response);
+
+        if (!s) {
+            console.error("Student object is null or undefined");
+            return alert("Error: Student record is empty!");
         }
 
-        // --- Basic Info ---
-        document.getElementById('editName').value = s.name || "";
-        document.getElementById('editEmail').value = s.email || "";
-        document.getElementById('editMobile').value = s.mobile || "";
-        document.getElementById('editGender').value = s.gender || "Male";
+        console.log("Fetched Student Data:", s); // Debugging ke liye
 
-        // --- Academic ---
-        document.getElementById('editRoll').value = s.rollNo || "";
-        document.getElementById('editEnroll').value = s.enrollmentNo || "";
-        if(document.getElementById('editCourse')) document.getElementById('editCourse').value = s.course || "";
-        if(document.getElementById('editBatch')) document.getElementById('editBatch').value = s.batch || "";
-        document.getElementById('editMarks').value = s.twelfthMarks || "";
-        document.getElementById('editYear').value = s.twelfthPassingYear || "";
+        // Safe Mapping Function
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = (val !== undefined && val !== null) ? val : "";
+        };
 
-        // --- Status ---
-        document.getElementById('editIsPaid').value = s.isPaid ? "💰 Paid" : "⚠️ Unpaid";
-        document.getElementById('editStatus').value = (s.status || "pending").toUpperCase();
-        if(document.getElementById('editPayId')) document.getElementById('editPayId').value = s.paymentId || "N/A";
-        if(document.getElementById('editIsVerified')) {
-    document.getElementById('editIsVerified').value = s.isVerified.toString(); 
-     }
-        if(document.getElementById('editAdminApproved')) document.getElementById('editAdminApproved').value = s.isAdminApproved ? "Approved" : "Pending";
+        // --- Basic Info Mapping ---
+        setVal('editName', s.name);
+        setVal('editEmail', s.email);
+        setVal('editMobile', s.mobile);
+        setVal('editGender', s.gender || "Male");
+        setVal('editRoll', s.rollNo);
+        setVal('editEnroll', s.enrollmentNo);
+        setVal('editCourse', s.course);
+        setVal('editBatch', s.batch);
+        setVal('editMarks', s.twelfthMarks);
+        setVal('editYear', s.twelfthPassingYear);
+        
+        // Status & Payment
+        setVal('editIsPaid', s.isPaid ? "💰 Paid" : "⚠️ Unpaid");
+        setVal('editStatus', (s.status || "pending").toUpperCase());
+        
+        // Dropdowns
+        const verSelect = document.getElementById('editIsVerified');
+        if(verSelect) verSelect.value = s.isVerified ? "true" : "false";
 
-        // --- Documents View Logic ---
+        // HOD Special Fields
+        setVal('hodEditCountDisplay', `${s.hodEditCount || 0} / 2 Used`);
+        setVal('hodDeptDisplay', s.department || "N/A");
+        setVal('hodPaymentId', s.paymentId || "No Record Found");
+
+        // Documents View Logic
         const viewResumeBtn = document.getElementById('viewResumeBtn');
         const viewPicBtn = document.getElementById('viewPicBtn');
-
-        if (s.resume && s.resume.startsWith("http")) {
-            viewResumeBtn.href = s.resume;
-            viewResumeBtn.style.display = 'inline-block';
-        } else { viewResumeBtn.style.display = 'none'; }
-
-        if (s.profilePicture && s.profilePicture.startsWith("http")) {
-            viewPicBtn.href = s.profilePicture;
-            viewPicBtn.style.display = 'inline-block';
-        } else { viewPicBtn.style.display = 'none'; }
+        
+        if (viewResumeBtn) {
+            if (s.resume && s.resume.startsWith("http")) {
+                viewResumeBtn.href = s.resume;
+                viewResumeBtn.style.display = 'inline-block';
+            } else {
+                viewResumeBtn.style.display = 'none';
+            }
+        }
+        
+        if (viewPicBtn) {
+            if (s.profilePicture && s.profilePicture.startsWith("http")) {
+                viewPicBtn.href = s.profilePicture;
+                viewPicBtn.style.display = 'inline-block';
+            } else {
+                viewPicBtn.style.display = 'none';
+            }
+        }
 
         document.getElementById('editModal').style.display = 'block';
     } catch (err) { 
-        console.error("Fetch error:", err);
-        alert("Data fetch error!"); 
+        console.error("Modal Load Error:", err);
+        alert("Fetch Error: Data is missing or server is not responding."); 
     }
 }
-
 // 3. Save Edit (Using FormData for Backend Sync)
 window.saveEdit = async function() {
     if (!currentStudentId) return alert("Student ID missing!");

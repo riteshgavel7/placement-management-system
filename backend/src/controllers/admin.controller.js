@@ -178,10 +178,7 @@ const getPendingCompanies = async (req, res) => {
     try {
         const companies = await Company.find({ 
             isVerified: false, 
-            $or: [
-                { status: { $ne: 'rejected' } },
-                { status: { $exists: false } }
-            ]
+            status: { $ne: 'rejected' }
         }).sort({ createdAt: -1 });
 
         res.json(companies);
@@ -198,8 +195,8 @@ const approveCompany = async (req, res) => {
         if (action === 'reject') {
             const updatedCompany = await Company.findByIdAndUpdate(
                 id, 
-                { isVerified: false, status: 'rejected' }, 
-                { returnDocument: 'after', runValidators: true } 
+                { $set: { isVerified: false, status: 'rejected' } }, 
+                { returnDocument: 'after', strict: false } 
             );
             if (!updatedCompany) return res.status(404).json({ message: "Company not found!" });
             return res.json({ message: "Company Rejected and Blocked successfully! ❌" });
@@ -208,8 +205,8 @@ const approveCompany = async (req, res) => {
         if (action === 'approve') {
             const updatedCompany = await Company.findByIdAndUpdate(
                 id, 
-                { isVerified: true, status: 'approved' }, 
-                { returnDocument: 'after', runValidators: true }
+                { $set: { isVerified: true, status: 'approved' } }, 
+                { returnDocument: 'after', strict: false }
             );
             if (!updatedCompany) return res.status(404).json({ message: "Company not found!" });
             return res.json({ message: "Company Approved successfully! ✅" });
