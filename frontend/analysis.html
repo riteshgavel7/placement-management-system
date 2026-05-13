@@ -12,6 +12,7 @@
     button { padding: 10px 18px; border-radius: 6px; cursor: pointer; border: none; font-weight: 600; transition: 0.3s; }
     
     .excel-btn { background: #1d6f42; color: white; }
+    .back-btn { background: #333; color: white; }
     button:hover { opacity: 0.85; transform: translateY(-1px); }
     button:disabled { background: #ccc; cursor: not-allowed; }
 
@@ -32,7 +33,7 @@
 
 <div class="container">
   <div class="nav-buttons">
-    
+    <button class="back-btn" onclick="window.history.back()">⬅ Go Back</button>
     <button class="excel-btn" id="dlBtn" onclick="downloadExcel()">📥 Download Excel</button>
   </div>
 
@@ -45,15 +46,15 @@
 <script>
 const API_BASE = "http://localhost:3000/api";
 
-// ✅ 1. URL se jobId nikalo (Dashboard link ke liye) ya localStorage dekho
+// ✅ FIX: Checking both "id" (Admin) and "jobId" (HOD) in URL
 const urlParams = new URLSearchParams(window.location.search);
-const jobId = urlParams.get("jobId") || localStorage.getItem("selectedJobId");
+const jobId = urlParams.get("id") || urlParams.get("jobId") || localStorage.getItem("selectedJobId");
 
 function getToken() {
-  // ✅ Priority order set kiya hai: HOD/General 'token' pehle
-  return localStorage.getItem("token") || 
+  // ✅ FIX: Admin token ko priority di gayi hai
+  return localStorage.getItem("adminToken") || 
+         localStorage.getItem("token") || 
          localStorage.getItem("companyToken") || 
-         localStorage.getItem("adminToken") ||
          sessionStorage.getItem("companyToken");
 }
 
@@ -96,9 +97,9 @@ async function load() {
   const container = document.getElementById("analysisResult");
   const token = getToken();
 
-  // ✅ Debugging ke liye console check karein agar error aaye
+  // Debugging ke liye
   console.log("Current JobID:", jobId);
-  console.log("Current Token:", token ? "Exist" : "Missing");
+  console.log("Current Token:", token ? "Exists" : "Missing");
 
   if (!jobId || !token) {
     container.innerHTML = `<div style="text-align:center; color:red; padding:20px;">

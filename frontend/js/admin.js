@@ -14,6 +14,15 @@ function getAdminHeaders() {
     };
 }
 
+// ================== LOGOUT LOGIC (ADDED FIX) ==================
+window.logout = function() {
+    if(confirm("Are you sure you want to logout?")) {
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("adminName");
+        window.location.replace("admin-login.html");
+    }
+};
+
 // ================== 1. Login Logic ==================
 if (adminLoginForm) {
     adminLoginForm.addEventListener("submit", async (e) => {
@@ -42,24 +51,20 @@ if (adminLoginForm) {
 
 // ================= DASHBOARD LOAD & SECURITY =================
 document.addEventListener("DOMContentLoaded", () => {
-    // Check elements instead of URL to prevent wrong-password loops
     const isLoginPage = document.getElementById("adminLoginForm") !== null;
     const isDashboardPage = document.getElementById("statsSection") !== null;
     const token = getAdminToken();
 
-    // 1. Agar user Dashboard par hai par Token nahi hai (Direct URL access)
     if (isDashboardPage && !token) {
         window.location.replace("admin-login.html");
         return;
     }
 
-    // 2. Agar user Login Page par hai aur pehle se Token hai (Already logged in)
     if (isLoginPage && token) {
         window.location.replace("admin-dashboard.html");
         return;
     }
 
-    // 3. Agar user Dashboard par hai aur Token bhi sahi hai -> Tabhi data load karo
     if (isDashboardPage && token) {
         showSection('statsSection');
         fetchDashboardStats();
@@ -67,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ================= SECTION SWITCH =================
-function showSection(sectionId) {
+window.showSection = function(sectionId) {
     const ids = ['statsSection', 'approvalSection', 'companySection', 'noticesSection', 'jobs', 'hodSection', 'updateSection'];
     ids.forEach(id => {
         const el = document.getElementById(id);
@@ -130,7 +135,7 @@ function renderPieChart(chartData) {
 }
 
 // ================= STUDENTS (PENDING) =================
-async function fetchPendingStudents() {
+window.fetchPendingStudents = async function() {
     try {
         const dept = document.getElementById("deptFilter")?.value;
         let url = `${API_ADMIN}/pending-students`;
@@ -174,7 +179,7 @@ async function fetchPendingCompanies() {
 }
 
 // ================= UPDATE ACTIONS =================
-async function updateStudent(id, action) {
+window.updateStudent = async function(id, action) {
     const res = await fetch(`${API_ADMIN}/approve-student/${id}`, {
         method: "PATCH",
         headers: getAdminHeaders(),
@@ -183,7 +188,7 @@ async function updateStudent(id, action) {
     if(res.ok) fetchPendingStudents();
 }
 
-async function updateCompany(id, action) {
+window.updateCompany = async function(id, action) {
     const res = await fetch(`${API_ADMIN}/approve-company/${id}`, {
         method: "PATCH",
         headers: getAdminHeaders(),
@@ -209,10 +214,10 @@ document.getElementById("noticeForm")?.addEventListener("submit", async (e) => {
     const data = await res.json();
     alert(data.message);
 });
+
 // ================= FETCH ALL NOTICES =================
 async function fetchNotices() {
     try {
-        // Apna route check kar lena, agar backend me /api/admin/notices hai toh wo likhna
         const res = await fetch(`${API_ADMIN}/notices`, { headers: getAdminHeaders() });
         const notices = await res.json();
         const tbody = document.getElementById("noticeTableBody");
@@ -245,11 +250,19 @@ window.deleteNotice = async (id) => {
         });
         const data = await res.json();
         alert(data.message);
-        if (res.ok) fetchNotices(); // Delete hone ke baad table refresh karein
+        if (res.ok) fetchNotices(); 
     } catch (err) { alert("Error deleting notice."); }
 };
 
-// ================= FETCH JOBS =================
+// ================= FETCH JOBS & NAVIGATION (ADDED FIX) =================
+window.viewApplicants = function(jobId) {
+    window.location.href = `applicants.html?id=${jobId}`;
+};
+
+window.openAnalysis = function(jobId) {
+    window.location.href = `analysis.html?id=${jobId}`;
+};
+
 async function loadJobs() {
     const tbody = document.getElementById("jobTableBody");
     if (!tbody) return;
@@ -271,28 +284,27 @@ async function loadJobs() {
 }
 
 // ================= AI & ANALYTICS =================
-
 window.runAIScan = async (jobId) => {
     if (!confirm("Admin: Start AI Scan?")) return;
     
     const loader = document.getElementById("aiLoader");
-    if (loader) loader.style.display = "flex"; // Loader ON (Screen Lock)
+    if (loader) loader.style.display = "flex";
 
     try {
         const res = await fetch(`${API_BASE}/ai/bulk/${jobId}`, { method: "POST", headers: getAdminHeaders() });
         const data = await res.json();
         
-        if (loader) loader.style.display = "none"; // Loader OFF
+        if (loader) loader.style.display = "none"; 
         alert(data.success ? `Processed: ${data.totalProcessed}` : data.message);
         window.location.reload();
     } catch (err) {
-        if (loader) loader.style.display = "none"; // Error aaye toh bhi Loader OFF
+        if (loader) loader.style.display = "none"; 
         alert("Something went wrong during AI screening.");
     }
 };
 
 // ================== EXPORT ==================
-async function exportData() {
+window.exportData = async function() {
     const token = getAdminToken();
     if (!token) return alert("Session expired. Please log in again to continue.");
     const btn = document.querySelector(".submit-btn");
@@ -327,7 +339,7 @@ async function fetchHODs() {
         `).join('');
     } catch (err) { console.error(err); }
 }
-// ================== 1. HOD FORM SHOW/HIDE ==================
+
 window.toggleHodForm = () => {
     const box = document.getElementById("addHodFormBox");
     if (box) {
@@ -335,11 +347,8 @@ window.toggleHodForm = () => {
     }
 };
 
-// ================== 2. CREATE NEW HOD ==================
 document.getElementById("createHodForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
-    // Form se data nikalna
     const newHodData = {
         name: document.getElementById("hodName").value,
         email: document.getElementById("hodEmail").value,
@@ -367,10 +376,8 @@ document.getElementById("createHodForm")?.addEventListener("submit", async (e) =
     }
 });
 
-// ================== 3. DELETE HOD ==================
 window.deleteHOD = async (id) => {
     if (!confirm("Are you sure you want to permanently delete this HOD account?")) return;
-    
     try {
         const res = await fetch(`${API_ADMIN}/delete-hod/${id}`, {
             method: "DELETE",
@@ -378,54 +385,39 @@ window.deleteHOD = async (id) => {
         });
         const data = await res.json();
         alert(data.message || "HOD deleted!");
-        
-        if (res.ok) fetchHODs(); // Delete hone ke baad list refresh karna
+        if (res.ok) fetchHODs(); 
     } catch (err) { 
         console.error("HOD Delete Error:", err);
         alert("Error deleting HOD"); 
     }
 };
 
-// ================== 4. EDIT (UPDATE) HOD ==================
 window.editHOD = async (id, oldName, oldDept, oldEmail) => {
-    // Admin se screen par naya data mangna (purana data pehle se bhara aayega)
     const newName = prompt("Update HOD Name:", oldName);
-    if (newName === null) return; // Cancel dabane par ruk jayega
-
+    if (newName === null) return;
     const newDept = prompt("Update Department (e.g., CSIT, Mechanical, Civil, Commerce):", oldDept);
     if (newDept === null) return;
-
     const newPassword = prompt("Set New Password (leave blank if you don't want to change it):", "");
 
-    // Data prepare karna
-    const updateData = { 
-        name: newName, 
-        department: newDept 
-    };
-    
-    // Agar password change kiya hai, tabhi bhejo
+    const updateData = { name: newName, department: newDept };
     if (newPassword && newPassword.trim() !== "") {
         updateData.password = newPassword;
     }
 
     try {
         const res = await fetch(`${API_ADMIN}/update-hod/${id}`, {
-            method: "PATCH", // Backend ke hisaab se PATCH request
+            method: "PATCH",
             headers: getAdminHeaders(),
             body: JSON.stringify(updateData)
         });
-        
         const data = await res.json();
         alert(data.message || "HOD details updated!");
-        
-        if (res.ok) fetchHODs(); // Table refresh karna
-    } catch (err) { 
-        console.error("HOD Update Error:", err);
-        alert("Failed to update HOD details."); 
-    }
+        if (res.ok) fetchHODs();
+    } catch (err) { alert("Failed to update HOD details."); }
 };
+
 // ================== STUDENT MANAGEMENT (UPDATE SECTION) ==================
-async function fetchAdminStudents() {
+window.fetchAdminStudents = async function() {
     try {
         const res = await fetch(`${API_ADMIN}/students-dashboard-data`, { headers: getAdminHeaders() });
         const data = await res.json();
@@ -447,14 +439,11 @@ async function fetchAdminStudents() {
     } catch (err) { console.error("Admin Fetch Error:", err); }
 }
 
-// 🛡️ LOAD ADMIN MODAL LOGIC
 window.loadAdminModal = async function(id) {
     currentStudentId = id;
     try {
         const res = await fetch(`${API_URL}/student-detail/${id}`, { headers: getAdminHeaders() });
         let response = await res.json();
-        
-        // Data extraction logic
         let s = response.data ? response.data : (Array.isArray(response) ? response.find(st => st._id === id) : response);
 
         if (!s) return alert("Record not found.");
@@ -464,7 +453,6 @@ window.loadAdminModal = async function(id) {
             if (el) el.value = (value !== undefined && value !== null) ? value : "";
         };
 
-        // --- Basic Fields Mapping ---
         safeSet('editName', s.name);
         safeSet('editEmail', s.email);
         safeSet('editMobile', s.mobile);
@@ -475,19 +463,14 @@ window.loadAdminModal = async function(id) {
         safeSet('editBatch', s.batch);
         safeSet('editMarks', s.twelfthMarks);
         safeSet('editGender', s.gender);
-        safeSet('editDept', s.department);
         safeSet('editPassingYear', s.twelfthPassingYear);
         safeSet('editPaymentId', s.paymentId || "N/A");
-        safeSet('editPassingYear', s.twelfthPassingYear);
-        safeSet('editGender', s.gender);
         safeSet('editHodCount', s.hodEditCount);
         safeSet('editStatus', (s.status || 'PENDING').toUpperCase());
         
-        // Email Verification Dropdown
         const emailVerEl = document.getElementById('editIsVerified');
         if (emailVerEl) emailVerEl.value = s.isVerified ? "true" : "false";
 
-        // Payment & Admin Approval Visuals
         const payEl = document.getElementById('editPaymentStatus');
         if (payEl) {
             payEl.value = s.isPaid ? "PAID ✅" : "UNPAID ❌";
@@ -500,7 +483,6 @@ window.loadAdminModal = async function(id) {
             appEl.style.color = s.isAdminApproved ? "#27ae60" : "#e74c3c";
         }
 
-        // --- File View Buttons (Sahi Link mapping) ---
         const vResume = document.getElementById('viewResumeBtn');
         const vPic = document.getElementById('viewPicBtn');
         
@@ -509,9 +491,7 @@ window.loadAdminModal = async function(id) {
                 vResume.href = s.resume;
                 vResume.style.display = 'inline-block';
                 vResume.innerHTML = "📄 View Resume";
-            } else {
-                vResume.style.display = 'none';
-            }
+            } else { vResume.style.display = 'none'; }
         }
 
         if (vPic) {
@@ -519,31 +499,23 @@ window.loadAdminModal = async function(id) {
                 vPic.href = s.profilePicture;
                 vPic.style.display = 'inline-block';
                 vPic.innerHTML = "🖼️ View Photo";
-            } else {
-                vPic.style.display = 'none'; 
-            }
+            } else { vPic.style.display = 'none'; }
         }
 
         document.getElementById('editModal').style.display = 'block';
-    } catch (err) { 
-       console.error("Load Error:", err);
-       alert("Error loading student details.");
-    }
+    } catch (err) { alert("Error loading student details."); }
 }
 
 window.closeModal = function() {
     document.getElementById('editModal').style.display = 'none';
-    // Files clear karein taaki next time blank dikhe
     document.getElementById('updatePicInput').value = "";
     document.getElementById('updateResumeInput').value = "";
 };
 
-// 2. Save Logic Fix
 window.saveAdminEdit = async function() {
     const action = document.getElementById('adminAction').value;
     const formData = new FormData();
     
-    // --- Existing Fields ---
     formData.append('name', document.getElementById('editName').value);
     formData.append('mobile', document.getElementById('editMobile').value);
     formData.append('rollNo', document.getElementById('editRoll').value);
@@ -553,14 +525,10 @@ window.saveAdminEdit = async function() {
     formData.append('twelfthMarks', document.getElementById('editMarks').value);
     formData.append('hodEditCount', parseInt(document.getElementById('editHodCount').value) || 0);
     formData.append('isVerified', document.getElementById('editIsVerified').value === 'true');
-
-    // --- 🚀 NAYE FIELDS (Jo screenshot mein hain par yahan nahi the) ---
     formData.append('department', document.getElementById('editDept').value); 
     formData.append('twelfthPassingYear', document.getElementById('editPassingYear').value);
     formData.append('gender', document.getElementById('editGender').value);
 
-    // --- Status Logic ---
-    // Agar Admin 'Approve' select karta hai toh status 'verified' hoga aur isAdminApproved true
     if (action === 'approve') {
         formData.append('status', 'verified');
         formData.append('isAdminApproved', true);
@@ -569,7 +537,6 @@ window.saveAdminEdit = async function() {
         formData.append('isAdminApproved', false);
     }
 
-    // --- Files Handling ---
     const picFile = document.getElementById('updatePicInput').files[0];
     const resumeFile = document.getElementById('updateResumeInput').files[0];
     if (picFile) formData.append('profilePicture', picFile);
@@ -577,7 +544,6 @@ window.saveAdminEdit = async function() {
 
     try {
         const headers = getAdminHeaders();
-        // Multipart data ke liye Content-Type delete karna compulsory hai
         delete headers['Content-Type'];
 
         const res = await fetch(`${API_URL}/update-details/${currentStudentId}`, {
@@ -590,12 +556,7 @@ window.saveAdminEdit = async function() {
         if (res.ok) { 
             alert("Record Updated Successfully! ✅"); 
             closeModal();
-            fetchAdminStudents(); // Table refresh karein
-        } else { 
-            alert("Error: " + data.message); 
-        }
-    } catch (err) { 
-        console.error("Critical Error:", err);
-        alert("Failed to communicate with server."); 
-    }
+            fetchAdminStudents();
+        } else { alert("Error: " + data.message); }
+    } catch (err) { alert("Failed to communicate with server."); }
 };
